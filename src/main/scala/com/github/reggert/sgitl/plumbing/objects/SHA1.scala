@@ -74,10 +74,9 @@ object SHA1 {
 	private def stringToBytes(hashString : String) = 
 		condenseBytes(hashString.toStream.map(HexDigitMap))
 	
-	// TODO: this can probably be made tail recursive
 	private def condenseBytes(digits : Stream[Int]) : Stream[Byte] = digits match
 	{
 		case high #:: low #:: rest => (((high << 4) | low).toByte) #:: condenseBytes(rest)
-		case _ => Stream.Empty
+		case _ => require(digits.isEmpty, "Odd number of digits"); Stream.Empty
 	}
 }
