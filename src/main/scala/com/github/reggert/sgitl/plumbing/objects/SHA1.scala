@@ -63,7 +63,7 @@ object SHA1 {
 			'E' -> 0xe,
 			'f' -> 0xf,
 			'F' -> 0xf
-		).withDefault(throw new IllegalArgumentException("Invalid character(s) in hash string"))
+		).withDefault(c => throw new IllegalArgumentException("Invalid character in hash string: " + c))
 	
 	private def stringToBytes(hashString : String) = 
 		condenseBytes(hashString.toStream.map(HexDigitMap))
