@@ -35,12 +35,6 @@ object SHA1 {
 		new SHA1(md.digest())
 	}
 	
-	/**
-	 * Utility function to convert an [[InputStream]] to a [[Traversable[Byte]]].
-	 */
-	def convertStream(input : InputStream) =
-		Stream.continually(input.read()).takeWhile(_ != -1)
-	
 	private def bytesToString(bytes : Traversable[Byte]) =
 		bytes.map(_ & 0xff).map(_.toHexString).mkString 
 		
