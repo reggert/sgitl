@@ -12,8 +12,8 @@ import java.security.{DigestInputStream,MessageDigest}
 final class SHA1 private(override val toString : String, val toBytes : IndexedSeq[Byte]) 
 	extends Equals 
 {
-	require(toBytes.size == SHA1.HashBytesLength)
-	require(toString.length == SHA1.HashStringLength)
+	require(toBytes.size == SHA1.HashBytesLength, "toBytes.size =" + toBytes.size)
+	require(toString.length == SHA1.HashStringLength, "toString.length = " + toString.length)
 	
 	def this(bytes : IndexedSeq[Byte]) =
 		this(SHA1.bytesToString(bytes), bytes)
@@ -53,11 +53,11 @@ object SHA1
 		new SHA1(md.digest())
 	}
 	
-	private def bytesToString(bytes : Traversable[Byte]) =
-		bytes.map(_ & 0xff).map(_.toHexString).mkString 
+	def bytesToString(bytes : Traversable[Byte]) =
+		bytes.map(_ & 0xff).map(_.toHexString).map(s => if (s.length < 2) "0" + s else s).mkString 
 		
-	private val HashBytesLength = 20
-	private val HashStringLength = HashBytesLength * 2
+	val HashBytesLength = 20
+	val HashStringLength = HashBytesLength * 2
 	private val HexDigitMap = Map(
 			'0' -> 0, 
 			'1' -> 1, 
@@ -83,7 +83,7 @@ object SHA1
 			'F' -> 0xf
 		).withDefault(c => throw new IllegalArgumentException("Invalid character in hash string: " + c))
 	
-	private def stringToBytes(hashString : String) = 
+	def stringToBytes(hashString : String) = 
 		condenseBytes(hashString.toStream.map(HexDigitMap))
 	
 	private def condenseBytes(digits : Stream[Int]) : Stream[Byte] = digits match
