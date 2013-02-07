@@ -10,6 +10,7 @@ import java.security.{DigestInputStream,MessageDigest}
  * included with the JRE.
  */
 final class SHA1 private(override val toString : String, val toBytes : IndexedSeq[Byte]) 
+	extends Equals 
 {
 	require(toBytes.size == SHA1.HashBytesLength)
 	require(toString.length == SHA1.HashStringLength)
@@ -19,13 +20,30 @@ final class SHA1 private(override val toString : String, val toBytes : IndexedSe
 			
 	def this(hashString : String) =
 		this(hashString, SHA1.stringToBytes(hashString).toIndexedSeq)
+  
+	def canEqual(other: Any) =
+		other.isInstanceOf[com.github.reggert.sgitl.plumbing.objects.SHA1]
+  
+	override def equals(other: Any) = other match 
+	{
+		case that : com.github.reggert.sgitl.plumbing.objects.SHA1 => 
+			that.canEqual(SHA1.this) && toBytes == that.toBytes
+		case _ => false
+	}
+  
+	override def hashCode() = 
+	{
+		val prime = 41
+		prime + toBytes.hashCode
+	}
 }
 
 /**
  * Provides a Scala-friendly wrapper around the SHA-1 implementation that is 
  * included with the JRE.
  */
-object SHA1 {
+object SHA1 
+{
 	private def newDigest = MessageDigest.getInstance("SHA-1")
 	
 	def hashBytes(input : Traversable[Byte]) =
