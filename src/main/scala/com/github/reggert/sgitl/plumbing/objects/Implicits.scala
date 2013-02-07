@@ -5,29 +5,26 @@ import java.io.InputStream
 
 trait Implicits 
 {
-	implicit def byteBuffer2Stream(buffer : ByteBuffer) : Stream[Byte] =
-		Stream.continually(buffer.get()).take(buffer.remaining)
+	implicit def byteBuffer2Iterator(buffer : ByteBuffer) : Iterator[Byte] =
+		Iterator.continually(buffer.get()).take(buffer.remaining)
 	
-	implicit def stream2ByteBuffer(stream : Stream[Byte]) : ByteBuffer =
-		ByteBuffer.wrap(stream.toArray)
+	implicit def traversable2ByteBuffer(traversable : Traversable[Byte]) : ByteBuffer =
+		ByteBuffer.wrap(traversable.toArray)
 		
-	implicit def inputStream2Stream(inputStream : InputStream) : Stream[Byte] =
-		Stream.continually(inputStream.read()).takeWhile(_ != -1).map(_.toByte)
+	implicit def inputStream2Iterator(inputStream : InputStream) : Iterator[Byte] =
+		Iterator.continually(inputStream.read()).takeWhile(_ != -1).map(_.toByte)
 	
-	implicit class StreamInputStream(val stream : Stream[Byte]) extends InputStream
+	implicit class IteratorInputStream(val iterator : Iterator[Byte]) extends InputStream
 	{
-		private var currentStream = stream
-		
 		override def read() =
-			if (currentStream.isEmpty)
+			if (!iterator.hasNext)
 				-1
 			else
-			{
-				val x = currentStream.head
-				currentStream = currentStream.tail
-				x
-			}
+				iterator.next
 	}
+
+	implicit def iterable2InputStream(iterable : Iterable[Byte]) =
+		new IteratorInputStream(iterable.iterator)		
 }
 
 

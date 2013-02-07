@@ -5,10 +5,7 @@ import java.util.zip.Deflater
 import java.util.zip.DeflaterInputStream
 import java.util.zip.InflaterInputStream
 
-import Implicits.StreamInputStream
-import Implicits.byteBuffer2Stream
-import Implicits.inputStream2Stream
-import Implicits.stream2ByteBuffer
+import Implicits._
 
 sealed abstract class LooseObject
 {
@@ -20,12 +17,12 @@ sealed abstract class LooseObject
 	
 	final def header = typeId + ' ' + java.lang.Long.toString(contentLength)
 	
-	private final lazy val encodedHeader : Stream[Byte] = ASCII.encode(header) :+ NullByte
+	private final lazy val encodedHeader : Stream[Byte] = ASCII.encode(header) ++: Stream(NullByte)
 	
 	final def uncompressed : Stream[Byte] = encodedHeader ++ content
 	
 	final def compressed(level : Int = Deflater.DEFAULT_COMPRESSION) : Stream[Byte] = 
-		new DeflaterInputStream(uncompressed, new Deflater(level))
+		new DeflaterInputStream(uncompressed, new Deflater(level)) ++: Stream.empty
 	
 	final lazy val objectId = SHA1.hashBytes(uncompressed)
 }
