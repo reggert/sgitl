@@ -31,7 +31,7 @@ sealed abstract class LooseObject
 }
 
 final class LooseBlob(
-		override val content : Traversable[Byte], 
+		override val content : IndexedSeq[Byte], 
 		override val contentLength : Long
 	) extends LooseObject
 {
@@ -65,7 +65,7 @@ object LooseObject
 					case Header(typeId, ContentLength(contentLength)) =>
 						typeId match
 						{
-							case LooseBlob.TypeId => new LooseBlob(content, contentLength)
+							case LooseBlob.TypeId => new LooseBlob(content.toIndexedSeq, contentLength)
 							case _ => throw new UnsupportedOperationException("Only blobs are supported")
 						}
 					case _ =>
