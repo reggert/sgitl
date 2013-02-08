@@ -8,7 +8,7 @@ trait Implicits
 	implicit def byteBuffer2Iterator(buffer : ByteBuffer) : Iterator[Byte] =
 		Iterator.continually(buffer.get()).take(buffer.remaining)
 	
-	implicit def traversable2ByteBuffer(traversable : Traversable[Byte]) : ByteBuffer =
+	implicit def traversable2ByteBuffer(traversable : TraversableOnce[Byte]) : ByteBuffer =
 		ByteBuffer.wrap(traversable.toArray)
 		
 	implicit def inputStream2Iterator(inputStream : InputStream) : Iterator[Byte] =
