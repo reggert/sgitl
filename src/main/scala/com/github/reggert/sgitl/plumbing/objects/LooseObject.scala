@@ -53,22 +53,27 @@ object LooseObject
 			catch {case _ : NumberFormatException => None}
 	}
 	
-	def fromStream(stream : Stream[Byte]) : LooseObject =
-		new InflaterInputStream(stream).span(_ != NullByte) match
+	def read(input : Iterator[Byte]) : LooseObject =
+	{
+		val (encodedHeader, afterHeader) = new InflaterInputStream(input).span(_ != NullByte)
+		if (afterHeader.hasNext)
 		{
-			case (encodedHeader, NullByte #:: content) =>
-				ASCII.decode(encodedHeader).toString match
+			val content = afterHeader.take(1).toIndexedSeq
+			val contentLength = content.size.toLong
+			ASCII.decode(encodedHeader).toString match
+			{
+				case Header(typeId, ContentLength(contentLength)) => typeId match
 				{
-					case Header(typeId, ContentLength(contentLength)) =>
-						typeId match
-						{
-							case LooseBlob.TypeId => new LooseBlob(content.toIndexedSeq, contentLength)
-							case _ => throw new UnsupportedOperationException("Only blobs are supported")
-						}
-					case _ =>
-						throw new InvalidObjectFormatException("Invalid header")
+					case LooseBlob.TypeId => new LooseBlob(content.toIndexedSeq, contentLength)
+					case _ => throw new UnsupportedOperationException("Only blobs are supported")
 				}
-			case _ => throw new InvalidObjectFormatException("No null byte found")
+				case _ => throw new InvalidObjectFormatException("Invalid header")
+			}
 		}
+		else
+			throw new InvalidObjectFormatException("No null byte found")
+	}
+	
+	def read(input : Iterable[Byte]) : LooseObject = read(input.iterator)
 	
 }
