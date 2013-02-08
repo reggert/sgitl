@@ -21,3 +21,5 @@ publishTo <<= version { (v: String) =>
 publishArtifact in Test := false
 
 pomIncludeRepository := { _ => false }
+
+libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.10.0" % "test"
