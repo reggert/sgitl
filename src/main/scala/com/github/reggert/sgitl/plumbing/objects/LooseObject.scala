@@ -9,13 +9,13 @@ import Implicits._
 
 sealed abstract class LooseObject
 {
-	def typeId : String
+	def objectType : ObjectType
 	def content : Traversable[Byte]
 	def contentLength : Long
 
 	import LooseObject._
 	
-	final def header = typeId + ' ' + java.lang.Long.toString(contentLength)
+	final def header = StringBuilder.newBuilder.append(objectType).append(' ').append(contentLength).toString
 	
 	private final lazy val encodedHeader : Stream[Byte] = ASCII.encode(header) ++: Stream(NullByte)
 	
@@ -27,16 +27,13 @@ sealed abstract class LooseObject
 	final lazy val objectId = SHA1.hashBytes(uncompressed)
 }
 
+
 final class LooseBlob(override val content : IndexedSeq[Byte]) extends LooseObject
 {
-	override def typeId = LooseBlob.TypeId
+	override def objectType = ObjectType.Blob
 	override def contentLength = content.size
 }
 
-object LooseBlob
-{
-	val TypeId = "blob"
-}
 
 object LooseObject
 {
@@ -50,7 +47,7 @@ object LooseObject
 		def apply(objectType : ObjectType, contentLength : Long) : String =
 		{
 			require (contentLength >= 0L)
-			(new StringBuilder).append(objectType).append(' ').append(contentLength).toString
+			StringBuilder.newBuilder.append(objectType).append(' ').append(contentLength).toString
 		}
 		
 		def unapply(s : String) : Option[(ObjectType, Long)] = s match
@@ -66,25 +63,27 @@ object LooseObject
 		}
 	}
 	
+	private def parseHeader(encodedHeader : TraversableOnce[Byte]) =
+		ASCII.decode(encodedHeader).toString() match
+		{
+			case HeaderLine(objectType, contentLength) => (objectType, contentLength)
+			case _ => throw new InvalidObjectFormatException("invalidHeader")
+		}
+	
 	
 	def read(input : Iterator[Byte]) : LooseObject =
 	{
 		val (encodedHeader, afterHeader) = new InflaterInputStream(input).span(_ != NullByte)
 		if (afterHeader.hasNext)
 		{
-			val content = afterHeader.drop(1)
-			ASCII.decode(encodedHeader).toString match
+			val (objectType, contentLength) = parseHeader(encodedHeader)
+			if (contentLength > Int.MaxValue) // FIXME: remove this limitation
+				throw new InvalidObjectFormatException("Exceeded maximum object size: " + contentLength)
+			val content = afterHeader.drop(1).take(contentLength.toInt).toIndexedSeq
+			objectType match
 			{
-				case HeaderLine(typeId, contentLength) => typeId match
-				{
-					case ObjectType.Blob =>
-						if (contentLength > Int.MaxValue) // FIXME: remove this limitation
-							throw new InvalidObjectFormatException("Exceeded maximum object size: " + contentLength)
-						else
-							new LooseBlob(content.take(contentLength.toInt).toIndexedSeq)
-					case _ => throw new UnsupportedOperationException("Only blobs are supported")
-				}
-				case _ => throw new InvalidObjectFormatException("Invalid header")
+				case ObjectType.Blob => new LooseBlob(content)
+				case _ => throw new UnsupportedOperationException("Only blobs are supported")
 			}
 		}
 		else
