@@ -27,12 +27,10 @@ sealed abstract class LooseObject
 	final lazy val objectId = SHA1.hashBytes(uncompressed)
 }
 
-final class LooseBlob(
-		override val content : IndexedSeq[Byte], 
-		override val contentLength : Long
-	) extends LooseObject
+final class LooseBlob(override val content : IndexedSeq[Byte]) extends LooseObject
 {
 	override def typeId = LooseBlob.TypeId
+	override def contentLength = content.size
 }
 
 object LooseBlob
@@ -44,27 +42,46 @@ object LooseObject
 {
 	private val ASCII = Charset.forName("US-ASCII")
 	private val NullByte : Byte = 0
-	private val Header = "(\\w+) +(\\d+)".r
+	private val HeaderPattern = "(\\w+) +(\\d+)".r
 	
-	private object ContentLength
+	object HeaderLine
 	{
-		def unapply(s : String) : Option[Long] =
-			try {Some(java.lang.Long.parseLong(s))}
-			catch {case _ : NumberFormatException => None}
+		import java.lang.Long.parseLong
+		def apply(objectType : ObjectType, contentLength : Long) : String =
+		{
+			require (contentLength >= 0L)
+			(new StringBuilder).append(objectType).append(' ').append(contentLength).toString
+		}
+		
+		def unapply(s : String) : Option[(ObjectType, Long)] = s match
+		{
+			case HeaderPattern(typeId, contentLengthString) => typeId match
+			{
+				case ObjectType(objectType) => 
+					try {Some(objectType, parseLong(contentLengthString))}
+					catch {case _ : NumberFormatException => None}
+				case _ => None
+			}
+			case _ => None
+		}
 	}
+	
 	
 	def read(input : Iterator[Byte]) : LooseObject =
 	{
 		val (encodedHeader, afterHeader) = new InflaterInputStream(input).span(_ != NullByte)
 		if (afterHeader.hasNext)
 		{
-			val content = afterHeader.take(1).toIndexedSeq
-			val contentLength = content.size.toLong
+			val content = afterHeader.drop(1)
 			ASCII.decode(encodedHeader).toString match
 			{
-				case Header(typeId, ContentLength(contentLength)) => typeId match
+				case HeaderLine(typeId, contentLength) => typeId match
 				{
-					case LooseBlob.TypeId => new LooseBlob(content.toIndexedSeq, contentLength)
+					case ObjectType.Blob =>
+						if (contentLength > Int.MaxValue) // FIXME: remove this limitation
+							throw new InvalidObjectFormatException("Exceeded maximum object size: " + contentLength)
+						else
+							new LooseBlob(content.take(contentLength.toInt).toIndexedSeq)
 					case _ => throw new UnsupportedOperationException("Only blobs are supported")
 				}
 				case _ => throw new InvalidObjectFormatException("Invalid header")
