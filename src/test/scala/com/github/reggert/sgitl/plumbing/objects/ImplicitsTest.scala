@@ -81,4 +81,18 @@ class ImplicitsTest extends Suite with ShouldMatchers
 			inputStream.read() should equal (n)
 		inputStream.read() should equal (-1)
 	}
+	
+	
+	def testInputStream2Iterator2InputStream2Iterator()
+	{
+		val values = (1 to 200).map(_.toByte)
+		val originalInputStream = new ByteArrayInputStream(values.toArray)
+		val iterator1 = Implicits.inputStream2Iterator(originalInputStream)
+		val wrapperInputStream = new Implicits.IteratorInputStream(iterator1)
+		val iterator2 = Implicits.inputStream2Iterator(wrapperInputStream)
+		val (first100, second100) = iterator2.span(_ <= 100)
+		val copiedValues = first100.toIndexedSeq ++ second100.drop(1).toIndexedSeq
+		copiedValues should equal (values.filterNot(_ == 101))
+	}
+	// TODO: test repeated wrapping of iterators and InputStreams
 }
