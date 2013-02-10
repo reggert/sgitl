@@ -91,6 +91,8 @@ object LooseObject
 			throw new InvalidObjectFormatException("No null byte found")
 	}
 	
+	def read(input : Iterator[Byte]) : LooseObject = read(Implicits.IteratorInputStream(input))
+	
 	def read(input : Iterable[Byte]) : LooseObject = read(input.iterator)
 	
 }
