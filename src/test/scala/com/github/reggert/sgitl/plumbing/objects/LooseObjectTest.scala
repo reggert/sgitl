@@ -73,7 +73,7 @@ class LooseObjectTest extends Suite with ShouldMatchers
 		val compressedData = arrayOutputStream.toByteArray
 		
 		val arrayInputStream = new ByteArrayInputStream(compressedData)
-		val obj = LooseObject.read(Implicits.inputStream2Iterator(arrayInputStream))
+		val obj = LooseObject.read(arrayInputStream)
 		obj.objectType should be (ObjectType.Blob)
 		obj.contentLength should equal (encodedContent.length)
 		obj.content should equal (encodedContent.toIndexedSeq)

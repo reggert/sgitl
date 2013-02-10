@@ -1,6 +1,7 @@
 package com.github.reggert.sgitl.plumbing.objects
 
 import java.nio.charset.Charset
+import java.io.InputStream
 import java.util.zip.Deflater
 import java.util.zip.DeflaterInputStream
 import java.util.zip.InflaterInputStream
@@ -71,7 +72,7 @@ object LooseObject
 		}
 	
 	
-	def read(input : Iterator[Byte]) : LooseObject =
+	def read(input : InputStream) : LooseObject =
 	{
 		val (encodedHeader, afterHeader) = new InflaterInputStream(input).span(_ != NullByte)
 		if (afterHeader.hasNext)
