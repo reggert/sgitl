@@ -50,7 +50,7 @@ class LooseObjectTest extends Suite with ShouldMatchers
 	private def string2ByteArray(s : String) =
 	{
 		val outputStream = new ByteArrayOutputStream
-		val writer = new OutputStreamWriter(outputStream, Charset.forName("US-ASCII"))
+		val writer = new OutputStreamWriter(outputStream, ASCII)
 		writer.write(s)
 		writer.close()
 		outputStream.toByteArray
