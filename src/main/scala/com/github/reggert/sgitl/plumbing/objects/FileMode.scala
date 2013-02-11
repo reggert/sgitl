@@ -14,14 +14,18 @@ sealed abstract class FileMode
 
 object FileMode
 {
-	def apply(fileMode : FileMode) = fileMode.toString
+	object AsString
+	{
+		def apply(fileMode : FileMode) = fileMode.toString
 	
-	def unapply(s : String) : Option[FileMode] = 
-		NonExecutableFile.unapply(s) orElse
-		Tree.unapply(s) orElse
-		GitLink.unapply(s) orElse
-		ExecutableFile.unapply(s) orElse
-		SymLink.unapply(s)
+		def unapply(s : String) : Option[FileMode] = 
+			NonExecutableFile.unapply(s) orElse
+			Tree.unapply(s) orElse
+			GitLink.unapply(s) orElse
+			ExecutableFile.unapply(s) orElse
+			SymLink.unapply(s)
+	}
+	
 	
 	object Tree extends FileMode
 	{

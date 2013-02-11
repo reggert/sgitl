@@ -91,4 +91,12 @@ object SHA1
 		case high #:: low #:: rest => (((high << 4) | low).toByte) #:: condenseBytes(rest)
 		case _ => require(digits.isEmpty, "Odd number of digits"); Stream.Empty
 	}
+	
+	object DigestBytes
+	{
+		def apply(sha1 : SHA1) = sha1.toBytes
+		
+		def unapply(bytes : IndexedSeq[Byte]) = 
+			if (bytes.size == HashBytesLength) Some(new SHA1(bytes)) else None
+	}
 }

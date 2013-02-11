@@ -12,13 +12,13 @@ sealed abstract class LooseObject
 {
 	def objectType : ObjectType
 	def content : Traversable[Byte]
-	def contentLength : Long
+	def contentLength : Long = content.size.toLong
 
 	import LooseObject._
 	
 	final def header = StringBuilder.newBuilder.append(objectType).append(' ').append(contentLength).toString
 	
-	private final lazy val encodedHeader : Stream[Byte] = ASCII.encode(header) ++: Stream(NullByte)
+	private final lazy val encodedHeader : Stream[Byte] = UTF8(header) ++: Stream(NullByte)
 	
 	final def uncompressed : Stream[Byte] = encodedHeader ++ content
 	
@@ -32,14 +32,19 @@ sealed abstract class LooseObject
 final class LooseBlob(override val content : IndexedSeq[Byte]) extends LooseObject
 {
 	override def objectType = ObjectType.Blob
-	override def contentLength = content.size
 }
+
+
+final class LooseTree(entries : Seq[TreeEntry]) extends LooseObject
+{
+	override def objectType = ObjectType.Tree
+	override lazy val content = entries.flatMap(_.encoded)
+}
+
 
 
 object LooseObject
 {
-	private val ASCII = Charset.forName("US-ASCII")
-	private val NullByte : Byte = 0
 	private val HeaderPattern = "(\\w+) +(\\d+)".r
 	
 	object HeaderLine
@@ -64,12 +69,11 @@ object LooseObject
 		}
 	}
 	
-	private def parseHeader(encodedHeader : TraversableOnce[Byte]) =
-		ASCII.decode(encodedHeader).toString() match
-		{
-			case HeaderLine(objectType, contentLength) => (objectType, contentLength)
-			case _ => throw new InvalidObjectFormatException("invalidHeader")
-		}
+	private def parseHeader(encodedHeader : TraversableOnce[Byte]) = encodedHeader match
+	{
+		case UTF8(HeaderLine(objectType, contentLength)) => (objectType, contentLength)
+		case _ => throw new InvalidObjectFormatException("invalidHeader")
+	}
 	
 	
 	def read(input : InputStream) : LooseObject =
@@ -84,7 +88,12 @@ object LooseObject
 			objectType match
 			{
 				case ObjectType.Blob => new LooseBlob(content)
-				case _ => throw new UnsupportedOperationException("Only blobs are supported")
+				case ObjectType.Tree => content match
+				{
+					case TreeEntry.EncodedSeq(entries @ _*) => new LooseTree(entries)
+					case _ => throw new InvalidObjectFormatException("Invalid tree object")
+				}
+				case _ => throw new UnsupportedOperationException("Only blobs and trees are supported")
 			}
 		}
 		else

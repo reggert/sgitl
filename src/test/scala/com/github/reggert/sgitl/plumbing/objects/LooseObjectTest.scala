@@ -47,28 +47,19 @@ class LooseObjectTest extends Suite with ShouldMatchers
 		}
 	}
 	
-	private def string2ByteArray(s : String) =
-	{
-		val outputStream = new ByteArrayOutputStream
-		val writer = new OutputStreamWriter(outputStream, ASCII)
-		writer.write(s)
-		writer.close()
-		outputStream.toByteArray
-	}
-	
 	
 	
 	def testReadBlob()
 	{
 		val content = "This is some test data.  This is only a test.  Don't get too excited."
-		val encodedContent = string2ByteArray(content)
+		val encodedContent = UTF8(content)
 		val header = "blob " + encodedContent.length + "\u0000"
-		val encodedHeader = string2ByteArray(header)
+		val encodedHeader = UTF8(header)
 		val data = encodedHeader ++ encodedContent
 		
 		val arrayOutputStream = new ByteArrayOutputStream
 		val deflaterOutputStream = new DeflaterOutputStream(arrayOutputStream)
-		deflaterOutputStream.write(data)
+		deflaterOutputStream.write(data.toArray)
 		deflaterOutputStream.close()
 		val compressedData = arrayOutputStream.toByteArray
 		
@@ -76,6 +67,6 @@ class LooseObjectTest extends Suite with ShouldMatchers
 		val obj = LooseObject.read(arrayInputStream)
 		obj.objectType should be (ObjectType.Blob)
 		obj.contentLength should equal (encodedContent.length)
-		obj.content should equal (encodedContent.toIndexedSeq)
+		obj.content should equal (encodedContent)
 	}
 }
