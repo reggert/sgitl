@@ -5,6 +5,7 @@ import java.io.InputStream
 import java.util.zip.Deflater
 import java.util.zip.DeflaterInputStream
 import java.util.zip.InflaterInputStream
+import scala.collection.immutable.SortedSet
 
 import Implicits._
 
@@ -50,11 +51,11 @@ final class LooseBlob(override val content : IndexedSeq[Byte]) extends LooseObje
 }
 
 
-final class LooseTree(val entries : Seq[TreeEntry]) extends LooseObject
+final class LooseTree(val entries : SortedSet[TreeEntry]) extends LooseObject
 	with Equals
 {
 	override def objectType = ObjectType.Tree
-	override lazy val content = entries.flatMap(_.encoded)
+	override lazy val content = entries.toIndexedSeq.flatMap(_.encoded)
 	
 	override def canEqual(other: Any) = other.isInstanceOf[LooseTree]
 	
@@ -120,7 +121,7 @@ object LooseObject
 				case ObjectType.Blob => new LooseBlob(content)
 				case ObjectType.Tree => content match
 				{
-					case TreeEntry.EncodedSeq(entries @ _*) => new LooseTree(entries)
+					case TreeEntry.EncodedSeq(entries @ _*) => new LooseTree(SortedSet(entries : _*))
 					case _ => throw new InvalidObjectFormatException("Invalid tree object")
 				}
 				case _ => throw new UnsupportedOperationException("Only blobs and trees are supported")
