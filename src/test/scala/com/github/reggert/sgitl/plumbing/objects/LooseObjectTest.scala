@@ -69,4 +69,18 @@ class LooseObjectTest extends Suite with ShouldMatchers
 		obj.contentLength should equal (encodedContent.length)
 		obj.content should equal (encodedContent)
 	}
+	
+	
+	
+	def testWriteBlob()
+	{
+		val content = "This is some test data.  This is only a test.  Don't get too excited."
+		val encodedContent = UTF8(content)
+		val blob = new LooseBlob(encodedContent)
+		
+		val compressedData = blob.compressed().toIndexedSeq
+		
+		val copiedBlob = LooseObject.read(compressedData)
+		copiedBlob should equal(blob)
+	}
 }
