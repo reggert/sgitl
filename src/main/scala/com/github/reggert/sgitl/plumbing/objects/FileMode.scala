@@ -1,12 +1,26 @@
 package com.github.reggert.sgitl.plumbing.objects
 
-sealed abstract class FileMode 
+sealed abstract class FileMode extends Equals
 {
 	def toInt : Int
 	final lazy val toBytes = UTF8(toString)
 	
 	def unapply(s : String) : Option[this.type] = 
 		if (s == toString) Some(this) else None
+		
+	def canEqual(other: Any) = other.isInstanceOf[FileMode]
+	
+	override def equals(other: Any) = other match 
+	{
+		case that : FileMode if that.canEqual(this) => this.toInt == that.toInt
+		case _ => false
+	}
+  
+	override def hashCode() = 
+	{
+		val prime = 41
+		prime + toInt
+	}
 }
 
 

@@ -21,13 +21,12 @@ final class SHA1 private(override val toString : String, val toBytes : IndexedSe
 	def this(hashString : String) =
 		this(hashString, SHA1.stringToBytes(hashString).toIndexedSeq)
   
-	def canEqual(other: Any) =
-		other.isInstanceOf[com.github.reggert.sgitl.plumbing.objects.SHA1]
+	def canEqual(other: Any) = other.isInstanceOf[SHA1]
   
 	override def equals(other: Any) = other match 
 	{
-		case that : com.github.reggert.sgitl.plumbing.objects.SHA1 => 
-			that.canEqual(SHA1.this) && toBytes == that.toBytes
+		case that : com.github.reggert.sgitl.plumbing.objects.SHA1 if that.canEqual(this) => 
+			toBytes == that.toBytes
 		case _ => false
 	}
   
