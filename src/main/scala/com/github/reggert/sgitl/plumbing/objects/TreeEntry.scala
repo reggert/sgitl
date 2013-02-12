@@ -1,19 +1,33 @@
 package com.github.reggert.sgitl.plumbing.objects
 
 
-final case class TreeEntry private(val fileMode : FileMode, val name : String, val referencedObjectId : SHA1) 
+final case class TreeEntry private(val fileMode : FileMode, val rawName : Seq[Byte], val referencedObjectId : SHA1) 
 {
-	// TODO: validate contents of 'name'
+	// TODO: validate contents of 'rawName'
 	
 	def encoded : IndexedSeq[Byte] = 
 		UTF8(StringBuilder.newBuilder.append(fileMode).append(' ').append(name).toString) ++ 
 		referencedObjectId.toBytes
+		
+	def name = rawName match
+	{
+		case UTF8(s) => s
+	}
 }
 
 
 object TreeEntry
 {
-	val ModeAndName = "(\\d+) (.*)".r
+	private val SpaceByte = 0x20.toByte  // the byte... from space!
+	
+	private object ModeAndName
+	{
+		def unapply(encoded : Seq[Byte]) : Option[(FileMode, Seq[Byte])] = encoded.span(_ != SpaceByte) match
+		{
+			case (UTF8(FileMode.AsString(mode)), rawName) => Some(mode, rawName)
+			case _ => None
+		}
+	}
 	
 	object Encoded
 	{
@@ -21,8 +35,8 @@ object TreeEntry
 		
 		def unapply(encoded : Seq[Byte]) : Option[TreeEntry] = encoded.span(_ != NullByte) match
 		{
-			case (UTF8(ModeAndName(FileMode.AsString(mode), name)), NullByte +: SHA1.DigestBytes(sha1)) => 
-				Some(TreeEntry(mode, name, sha1))
+			case (ModeAndName(mode, rawName), NullByte +: SHA1.DigestBytes(sha1)) => 
+				Some(TreeEntry(mode, rawName, sha1))
 			case _ => None
 		}
 	}
@@ -34,11 +48,15 @@ object TreeEntry
 		
 		def unapplySeq(encoded : IndexedSeq[Byte]) : Option[Seq[TreeEntry]] = encoded.span(_ != NullByte) match
 		{
-			case (UTF8(ModeAndName(FileMode.AsString(mode), name)), NullByte +: afterNull) if afterNull.size >= SHA1.HashBytesLength =>
+			case (ModeAndName(mode, rawName), NullByte +: afterNull) if afterNull.size >= SHA1.HashBytesLength =>
 				afterNull.splitAt(SHA1.HashBytesLength) match
 				{
-					case (SHA1.DigestBytes(sha1), IndexedSeq()) => Some(Seq(TreeEntry(mode, name, sha1)))
-					case (SHA1.DigestBytes(sha1), EncodedSeq(rest @ _*)) => Some(TreeEntry(mode, name, sha1) +: rest)
+					case (SHA1.DigestBytes(sha1), rest) => rest match
+					{
+						case IndexedSeq() => Some(Seq(TreeEntry(mode, rawName, sha1)))
+						case EncodedSeq(moreEntries @ _*) => Some(TreeEntry(mode, rawName, sha1) +: moreEntries)
+						case _ => None
+					}
 					case _ => None
 				}
 			case _ => None
