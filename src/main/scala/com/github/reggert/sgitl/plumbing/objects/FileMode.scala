@@ -3,6 +3,7 @@ package com.github.reggert.sgitl.plumbing.objects
 sealed abstract class FileMode 
 {
 	def toInt : Int
+	final lazy val toBytes = UTF8(toString)
 	
 	def unapply(s : String) : Option[this.type] = 
 		if (s == toString) Some(this) else None
