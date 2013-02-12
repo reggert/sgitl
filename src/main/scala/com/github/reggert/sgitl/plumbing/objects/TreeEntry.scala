@@ -1,7 +1,8 @@
 package com.github.reggert.sgitl.plumbing.objects
 
 
-final case class TreeEntry private(val fileMode : FileMode, val rawName : Seq[Byte], val referencedObjectId : SHA1) 
+final case class TreeEntry private(val fileMode : FileMode, val rawName : Seq[Byte], val referencedObjectId : SHA1)
+	extends Ordered[TreeEntry]
 {
 	import TreeEntry._
 	
@@ -19,12 +20,22 @@ final case class TreeEntry private(val fileMode : FileMode, val rawName : Seq[By
 	{
 		case SystemEncoding(s) => s
 	}
+	
+	private def comparableName = 
+		if (fileMode == FileMode.Tree) rawName :+ SlashByte else rawName
+		
+	private def mappedComparableName = comparableName.view.map(_.toInt & 0xff)
+	
+	override def compare(that : TreeEntry) = 
+		Ordering.Implicits.seqDerivedOrdering(Ordering.Int).compare(this.mappedComparableName, that.mappedComparableName)
+	
 }
 
 
 object TreeEntry
 {
 	private val SpaceByte = 0x20.toByte  // the byte... from space!
+	private val SlashByte = 0x2f.toByte
 	
 	private object ModeAndName
 	{
