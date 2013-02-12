@@ -3,7 +3,7 @@ package com.github.reggert.sgitl.plumbing.objects
 
 final case class TreeEntry private(val fileMode : FileMode, val rawName : Seq[Byte], val referencedObjectId : SHA1) 
 {
-	// TODO: validate contents of 'rawName'
+	require(!rawName.contains(NullByte))
 	
 	def encoded : IndexedSeq[Byte] = 
 		UTF8(StringBuilder.newBuilder.append(fileMode).append(' ').append(name).toString) ++ 
