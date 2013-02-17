@@ -1,7 +1,7 @@
 package com.github.reggert.sgitl.plumbing.objects
 
 
-final case class TreeEntry private(val fileMode : FileMode, val rawName : Seq[Byte], val referencedObjectId : SHA1)
+final case class TreeEntry(val fileMode : FileMode, val rawName : Seq[Byte], val referencedObjectId : SHA1)
 	extends Ordered[TreeEntry]
 {
 	import TreeEntry._
