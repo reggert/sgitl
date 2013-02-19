@@ -3,7 +3,8 @@ package com.github.reggert.sgitl.plumbing.objects
 sealed abstract class FileMode extends Equals
 {
 	def toInt : Int
-	final lazy val toBytes = UTF8(toString)
+	// lazy because it relies on toString implementation from subclasses
+	final lazy val toBytes = UTF8(toString) 
 	
 	def unapply(s : String) : Option[this.type] = 
 		if (s == toString) Some(this) else None
