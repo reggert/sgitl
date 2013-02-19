@@ -1,7 +1,7 @@
 package com.github.reggert.sgitl.plumbing.objects
 
 
-final case class TreeEntry(val fileMode : FileMode, val rawName : Seq[Byte], val referencedObjectId : SHA1)
+final class TreeEntry(val fileMode : FileMode, val rawName : Seq[Byte], val referencedObjectId : SHA1)
 	extends Ordered[TreeEntry]
 {
 	import TreeEntry._
@@ -53,7 +53,7 @@ object TreeEntry
 		def unapply(encoded : Seq[Byte]) : Option[TreeEntry] = encoded.span(_ != NullByte) match
 		{
 			case (ModeAndName(mode, rawName), NullByte +: SHA1.DigestBytes(sha1)) => 
-				Some(TreeEntry(mode, rawName, sha1))
+				Some(new TreeEntry(mode, rawName, sha1))
 			case _ => None
 		}
 	}
@@ -70,8 +70,8 @@ object TreeEntry
 				{
 					case (SHA1.DigestBytes(sha1), rest) => rest match
 					{
-						case IndexedSeq() => Some(Seq(TreeEntry(mode, rawName, sha1)))
-						case EncodedSeq(moreEntries @ _*) => Some(TreeEntry(mode, rawName, sha1) +: moreEntries)
+						case IndexedSeq() => Some(Seq(new TreeEntry(mode, rawName, sha1)))
+						case EncodedSeq(moreEntries @ _*) => Some(new TreeEntry(mode, rawName, sha1) +: moreEntries)
 						case _ => None
 					}
 					case _ => None
