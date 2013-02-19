@@ -1,12 +1,17 @@
 package com.github.reggert.sgitl.plumbing.objects
 
-import java.nio.charset.Charset
+import java.nio.CharBuffer
+import java.nio.charset.{Charset,CharacterCodingException}
 
 class CharacterSet(val charset : Charset) 
 {
 	import Implicits._
 	
-	def apply(s : String) : IndexedSeq[Byte] = charset.encode(s).toIndexedSeq
+	@throws(classOf[CharacterCodingException])
+	def apply(s : String) : IndexedSeq[Byte] =
+		charset.newEncoder().encode(CharBuffer.wrap(s)).toIndexedSeq
+		
 	def unapply(bytes : TraversableOnce[Byte]) =
-		Some(charset.newDecoder().decode(bytes).toString)
+		try {Some(charset.newDecoder().decode(bytes).toString)}
+		catch {case _ : CharacterCodingException => None}
 }
