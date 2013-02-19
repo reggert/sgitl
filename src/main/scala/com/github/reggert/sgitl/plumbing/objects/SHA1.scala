@@ -91,7 +91,7 @@ object SHA1
 		case _ => require(digits.isEmpty, "Odd number of digits"); Stream.Empty
 	}
 	
-	object DigestBytes
+	object AsBytes
 	{
 		def apply(sha1 : SHA1) = sha1.toBytes
 		
