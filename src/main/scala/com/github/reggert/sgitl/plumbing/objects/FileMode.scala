@@ -43,6 +43,15 @@ object FileMode
 	}
 	
 	
+	object AsBytes
+	{
+		def apply(fileMode : FileMode) = fileMode.toBytes
+		
+		def unapply(bytes : Seq[Byte]) : Option[FileMode] =
+			UTF8.unapply(bytes) flatMap (AsString.unapply)
+	}
+	
+	
 	object Tree extends FileMode
 	{
 		override def toString = "040000"
