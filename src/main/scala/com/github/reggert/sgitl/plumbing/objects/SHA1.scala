@@ -15,11 +15,16 @@ final class SHA1 private(override val toString : String, val toBytes : IndexedSe
 	require(toBytes.size == SHA1.HashBytesLength, "toBytes.size =" + toBytes.size)
 	require(toString.length == SHA1.HashStringLength, "toString.length = " + toString.length)
 	
-	def this(bytes : IndexedSeq[Byte]) =
-		this(SHA1.bytesToString(bytes), bytes)
+	def this(bytes : IndexedSeq[Byte]) = this(
+			SHA1.HexBytes.apply(bytes),
+			bytes
+		)
 			
-	def this(hashString : String) =
-		this(hashString, SHA1.stringToBytes(hashString).toIndexedSeq)
+	def this(hashString : String) = this(
+			hashString, 
+			SHA1.HexBytes.unapply(hashString).getOrElse
+				(throw new IllegalArgumentException("Invalid hash string"))
+		)
   
 	def canEqual(other: Any) = other.isInstanceOf[SHA1]
   
@@ -52,9 +57,6 @@ object SHA1
 		new SHA1(md.digest())
 	}
 	
-	def bytesToString(bytes : Traversable[Byte]) =
-		bytes.map(_ & 0xff).map(_.toHexString).map(s => if (s.length < 2) "0" + s else s).mkString 
-		
 	val HashBytesLength = 20
 	val HashStringLength = HashBytesLength * 2
 	private val HexDigitMap = Map(
@@ -82,20 +84,108 @@ object SHA1
 			'F' -> 0xf
 		).withDefault(c => throw new IllegalArgumentException("Invalid character in hash string: " + c))
 	
-	def stringToBytes(hashString : String) = 
-		condenseBytes(hashString.toStream.map(HexDigitMap))
 	
-	private def condenseBytes(digits : Stream[Int]) : Stream[Byte] = digits match
+	private object HexDigit
 	{
-		case high #:: low #:: rest => (((high << 4) | low).toByte) #:: condenseBytes(rest)
-		case _ => require(digits.isEmpty, "Odd number of digits"); Stream.Empty
+		private val applyTable = Map(
+				0 -> '0',
+				1 -> '1',
+				2 -> '2',
+				3 -> '3',
+				4 -> '4',
+				5 -> '5',
+				6 -> '6',
+				7 -> '7',
+				8 -> '8',
+				9 -> '9',
+				0xa -> 'a',
+				0xb -> 'b',
+				0xc -> 'c',
+				0xd -> 'd',
+				0xe -> 'e',
+				0xf -> 'f'
+			)
+		private val unapplyTable = Map(
+				'0' -> 0, 
+				'1' -> 1, 
+				'2' -> 2, 
+				'3' -> 3, 
+				'4' -> 4, 
+				'5' -> 5, 
+				'6' -> 6, 
+				'7' -> 7, 
+				'8' -> 8,
+				'9' -> 9,
+				'a' -> 0xa,
+				'A' -> 0xa,
+				'b' -> 0xb,
+				'B' -> 0xb,
+				'c' -> 0xc,
+				'C' -> 0xc,
+				'd' -> 0xd,
+				'D' -> 0xd,
+				'e' -> 0xe,
+				'E' -> 0xe,
+				'f' -> 0xf,
+				'F' -> 0xf
+			)
+		
+		
+		def apply(n : Int) : Char = applyTable.getOrElse(
+				n, 
+				throw new IllegalArgumentException("Integer out of range of hexadecimal digit: " + n)
+			) 
+		
+		def unapply(c : Char) : Option[Int] = unapplyTable.get(c)
 	}
+	
+	
+	private object HexDigits
+	{
+		def apply(ns : Seq[Int]) = (ns map (HexDigit.apply)).mkString 
+		
+		def unapplySeq(digits : String) : Option[Seq[Int]] =
+			(digits.map(HexDigit.unapply) :\ Some(List.empty[Int]).asInstanceOf[Option[Seq[Int]]]) {
+				case (None, _) => None
+				case (_, None) => None
+				case (left, right) => Some(left.get +: right.get)
+			}
+	}
+	
+	
+	private object HexBytes
+	{
+		def apply(bytes : Seq[Byte]) = 
+			HexDigits(bytes map (_ & 0xff) flatMap {n => Seq(n >> 4, n & 0xf)})
+		
+		def unapply(s : String) : Option[IndexedSeq[Byte]] = 
+			if (s.length() % 2 != 0) 
+				None
+			else
+				HexDigits.unapplySeq(s) map { digits =>
+					for (Seq(high, low) <- digits.grouped(2)) 
+						yield (((high << 4) | low).toByte)
+				} map (_.toIndexedSeq)
+	}
+	
 	
 	object AsBytes
 	{
 		def apply(sha1 : SHA1) = sha1.toBytes
 		
-		def unapply(bytes : IndexedSeq[Byte]) = 
+		def unapply(bytes : IndexedSeq[Byte]) : Option[SHA1] = 
 			if (bytes.size == HashBytesLength) Some(new SHA1(bytes)) else None
+	}
+	
+	object AsString
+	{
+		def apply(sha1 : SHA1) = sha1.toString
+		
+		def unapply(s : String) : Option[SHA1] = s match
+		{
+			case _ if s.length != HashStringLength => None
+			case HexBytes(bytes) => Some(new SHA1(s, bytes))
+			case _ => None
+		}
 	}
 }
