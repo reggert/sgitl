@@ -7,6 +7,7 @@ import org.scalatest.junit.JUnitRunner
 import java.io.{ByteArrayOutputStream, ByteArrayInputStream, OutputStreamWriter}
 import java.util.zip.DeflaterOutputStream
 import java.nio.charset.Charset
+import scala.collection.immutable.SortedSet
 
 @RunWith(classOf[JUnitRunner])
 class LooseObjectTest extends Suite with ShouldMatchers
@@ -82,5 +83,23 @@ class LooseObjectTest extends Suite with ShouldMatchers
 		
 		val copiedBlob = LooseObject.read(compressedData)
 		copiedBlob should equal(blob)
+	}
+	
+	
+	def testReadWriteTree()
+	{
+		val entries = SortedSet(
+				new TreeEntry(FileMode.NonExecutableFile, UTF8("file1.foo"), new SHA1(Array.fill(SHA1.HashBytesLength)(1.toByte))),
+				new TreeEntry(FileMode.ExecutableFile, UTF8("file2.sh"), new SHA1(Array.fill(SHA1.HashBytesLength)(2.toByte))),
+				new TreeEntry(FileMode.GitLink, UTF8("submodule1"), new SHA1(Array.fill(SHA1.HashBytesLength)(3.toByte))),
+				new TreeEntry(FileMode.SymLink, UTF8("file3.txt"), new SHA1(Array.fill(SHA1.HashBytesLength)(4.toByte))),
+				new TreeEntry(FileMode.Tree, UTF8("subdir1"), new SHA1(Array.fill(SHA1.HashBytesLength)(5.toByte)))
+			)
+		val tree = new LooseTree(entries)
+		
+		val compressedData = tree.compressed().toIndexedSeq
+		
+		val copiedTree = LooseObject.read(compressedData)
+		copiedTree should equal(tree)
 	}
 }
