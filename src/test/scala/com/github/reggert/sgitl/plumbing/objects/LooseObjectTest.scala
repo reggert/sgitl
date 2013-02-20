@@ -89,11 +89,11 @@ class LooseObjectTest extends Suite with ShouldMatchers
 	def testReadWriteTree()
 	{
 		val entries = SortedSet(
-				new TreeEntry(FileMode.NonExecutableFile, UTF8("file1.foo"), new SHA1(Array.fill(SHA1.HashBytesLength)(1.toByte))),
-				new TreeEntry(FileMode.ExecutableFile, UTF8("file2.sh"), new SHA1(Array.fill(SHA1.HashBytesLength)(2.toByte))),
-				new TreeEntry(FileMode.GitLink, UTF8("submodule1"), new SHA1(Array.fill(SHA1.HashBytesLength)(3.toByte))),
-				new TreeEntry(FileMode.SymLink, UTF8("file3.txt"), new SHA1(Array.fill(SHA1.HashBytesLength)(4.toByte))),
-				new TreeEntry(FileMode.Tree, UTF8("subdir1"), new SHA1(Array.fill(SHA1.HashBytesLength)(5.toByte)))
+				new TreeEntry(FileMode.NonExecutableFile, UTF8("file1.foo"), new SHA1(Array.fill(SHA1.AsBytes.ExpectedLength)(1.toByte))),
+				new TreeEntry(FileMode.ExecutableFile, UTF8("file2.sh"), new SHA1(Array.fill(SHA1.AsBytes.ExpectedLength)(2.toByte))),
+				new TreeEntry(FileMode.GitLink, UTF8("submodule1"), new SHA1(Array.fill(SHA1.AsBytes.ExpectedLength)(3.toByte))),
+				new TreeEntry(FileMode.SymLink, UTF8("file3.txt"), new SHA1(Array.fill(SHA1.AsBytes.ExpectedLength)(4.toByte))),
+				new TreeEntry(FileMode.Tree, UTF8("subdir1"), new SHA1(Array.fill(SHA1.AsBytes.ExpectedLength)(5.toByte)))
 			)
 		val tree = new LooseTree(entries)
 		

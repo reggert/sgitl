@@ -65,8 +65,8 @@ object TreeEntry
 		
 		def unapplySeq(encoded : IndexedSeq[Byte]) : Option[Seq[TreeEntry]] = encoded.span(_ != NullByte) match
 		{
-			case (ModeAndName(mode, rawName), NullByte +: afterNull) if afterNull.size >= SHA1.HashBytesLength =>
-				afterNull.splitAt(SHA1.HashBytesLength) match
+			case (ModeAndName(mode, rawName), NullByte +: afterNull) if afterNull.size >= SHA1.AsBytes.ExpectedLength =>
+				afterNull.splitAt(SHA1.AsBytes.ExpectedLength) match
 				{
 					case (SHA1.AsBytes(sha1), rest) => rest match
 					{

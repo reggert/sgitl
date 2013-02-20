@@ -12,8 +12,8 @@ import java.security.{DigestInputStream,MessageDigest}
 final class SHA1 private(override val toString : String, val toBytes : IndexedSeq[Byte]) 
 	extends Equals 
 {
-	require(toBytes.size == SHA1.HashBytesLength, "toBytes.size =" + toBytes.size)
-	require(toString.length == SHA1.HashStringLength, "toString.length = " + toString.length)
+	require(toBytes.size == SHA1.AsBytes.ExpectedLength, "toBytes.size =" + toBytes.size)
+	require(toString.length == SHA1.AsString.ExpectedLength, "toString.length = " + toString.length)
 	
 	def this(bytes : IndexedSeq[Byte]) = this(
 			SHA1.HexBytes.apply(bytes),
@@ -57,32 +57,7 @@ object SHA1
 		new SHA1(md.digest())
 	}
 	
-	val HashBytesLength = 20
-	val HashStringLength = HashBytesLength * 2
-	private val HexDigitMap = Map(
-			'0' -> 0, 
-			'1' -> 1, 
-			'2' -> 2, 
-			'3' -> 3, 
-			'4' -> 4, 
-			'5' -> 5, 
-			'6' -> 6, 
-			'7' -> 7, 
-			'8' -> 8,
-			'9' -> 9,
-			'a' -> 0xa,
-			'A' -> 0xa,
-			'b' -> 0xb,
-			'B' -> 0xb,
-			'c' -> 0xc,
-			'C' -> 0xc,
-			'd' -> 0xd,
-			'D' -> 0xd,
-			'e' -> 0xe,
-			'E' -> 0xe,
-			'f' -> 0xf,
-			'F' -> 0xf
-		).withDefault(c => throw new IllegalArgumentException("Invalid character in hash string: " + c))
+	
 	
 	
 	private object HexDigit
@@ -169,21 +144,26 @@ object SHA1
 	}
 	
 	
+	
 	object AsBytes
 	{
+		val ExpectedLength = 20
+		
 		def apply(sha1 : SHA1) = sha1.toBytes
 		
 		def unapply(bytes : IndexedSeq[Byte]) : Option[SHA1] = 
-			if (bytes.size == HashBytesLength) Some(new SHA1(bytes)) else None
+			if (bytes.size == ExpectedLength) Some(new SHA1(bytes)) else None
 	}
 	
 	object AsString
 	{
+		val ExpectedLength = AsBytes.ExpectedLength * 2
+		
 		def apply(sha1 : SHA1) = sha1.toString
 		
 		def unapply(s : String) : Option[SHA1] = s match
 		{
-			case _ if s.length != HashStringLength => None
+			case _ if s.length != ExpectedLength => None
 			case HexBytes(bytes) => Some(new SHA1(s, bytes))
 			case _ => None
 		}
