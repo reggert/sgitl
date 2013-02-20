@@ -58,8 +58,6 @@ object SHA1
 	}
 	
 	
-	
-	
 	private object HexDigit
 	{
 		private val applyTable = Map(
