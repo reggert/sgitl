@@ -134,13 +134,12 @@ object SHA1
 		def unapply(s : String) : Option[IndexedSeq[Byte]] = 
 			if (s.length() % 2 != 0) 
 				None
-			else
-				HexDigits.unapply(s) map { digits =>
-					for (Seq(high, low) <- digits.grouped(2)) 
+			else for (digits <- HexDigits.unapply(s))
+				yield {
+					for (Seq(high, low) <- digits.grouped(2))
 						yield (((high << 4) | low).toByte)
-				} map (_.toIndexedSeq)
+				}.toIndexedSeq
 	}
-	
 	
 	
 	object AsBytes
@@ -152,6 +151,7 @@ object SHA1
 		def unapply(bytes : IndexedSeq[Byte]) : Option[SHA1] = 
 			if (bytes.size == ExpectedLength) Some(new SHA1(bytes)) else None
 	}
+	
 	
 	object AsString
 	{
