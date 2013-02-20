@@ -15,7 +15,7 @@ final class SHA1 private(override val toString : String, val toBytes : IndexedSe
 	require(toBytes.size == SHA1.asBytes.ExpectedLength, "toBytes.size =" + toBytes.size)
 	require(toString.length == SHA1.asString.ExpectedLength, "toString.length = " + toString.length)
   
-	def canEqual(other: Any) = other.isInstanceOf[SHA1]
+	override def canEqual(other: Any) = other.isInstanceOf[SHA1]
   
 	override def equals(other: Any) = other match 
 	{
@@ -39,6 +39,9 @@ object SHA1
 {
 	private def newDigest = MessageDigest.getInstance("SHA-1")
 	
+	/**
+	 * Computes the SHA1 digest of the input content.
+	 */
 	def digest(input : Traversable[Byte]) =
 	{
 		val md = newDigest
@@ -132,41 +135,79 @@ object SHA1
 	}
 	
 	
+	/**
+	 * Factory functor to create an instance of SHA1 from a byte sequence.
+	 */
 	object fromBytes
 	{
+		/**
+		 * Constructs an instance of SHA1 from a byte sequence that makes up its value.
+		 */
+		@throws(classOf[IllegalArgumentException])
 		def apply(bytes : IndexedSeq[Byte]) : SHA1 =
 			asBytes.unapply(bytes).getOrElse(throw new IllegalArgumentException("Invalid byte sequence"))
 			
+		/**
+		 * Extracts the byte sequence that makes up the value of an instance of SHA1.
+		 */
 		def unapply(sha1 : SHA1) = Some(sha1.toBytes)
 	}
 	
-	
+
+	/**
+	 * Extractor to obtain an instance of SHA1 from a sequence of bytes.
+	 */
 	object asBytes
 	{
 		val ExpectedLength = 20
 		
+		/**
+		 * Obtains the bytes that make up the value of an instance of SHA1.
+		 */
 		def apply(sha1 : SHA1) = sha1.toBytes
 		
+		/**
+		 * Extracts an instance of SHA1 from a sequence of bytes, if valid.
+		 */
 		def unapply(bytes : IndexedSeq[Byte]) : Option[SHA1] = 
 			if (bytes.size == ExpectedLength) Some(new SHA1(HexBytes(bytes), bytes)) else None
 	}
 	
 	
+	/**
+	 * Factory functor to create an instance of SHA1 from a string representation.
+	 */
 	object fromString
 	{
+		/**
+		 * Constructs an instance of SHA1 from its string representation.
+		 */
+		@throws(classOf[IllegalArgumentException])
 		def apply(s : String) : SHA1 =
 			asString.unapply(s).getOrElse(throw new IllegalArgumentException("Invalid hash string"))
 			
+		/**
+		 * Extracts the string representation from an instance of SHA1.
+		 */
 		def unapply(sha1 : SHA1) = Some(sha1.toString)
 	}
 	
 	
+	/**
+	 * Extractor to obtain an instance of SHA1 from a string representation.
+	 */
 	object asString
 	{
 		val ExpectedLength = asBytes.ExpectedLength * 2
 		
+		/**
+		 * Obtains the string representation from an instance of SHA1.
+		 */
 		def apply(sha1 : SHA1) = sha1.toString
 		
+		/**
+		 * Extracts an instance of SHA1 from a string representation, if valid.
+		 */
 		def unapply(s : String) : Option[SHA1] = s match
 		{
 			case _ if s.length != ExpectedLength => None
