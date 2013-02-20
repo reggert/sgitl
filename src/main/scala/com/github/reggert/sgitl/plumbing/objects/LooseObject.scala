@@ -26,7 +26,7 @@ sealed abstract class LooseObject
 	final def compressed(level : Int = Deflater.DEFAULT_COMPRESSION) : Stream[Byte] = 
 		new DeflaterInputStream(uncompressed, new Deflater(level)) ++: Stream.empty
 	
-	final lazy val objectId = SHA1.hashBytes(uncompressed)
+	final lazy val objectId = SHA1.digest(uncompressed)
 }
 
 

@@ -39,7 +39,7 @@ object SHA1
 {
 	private def newDigest = MessageDigest.getInstance("SHA-1")
 	
-	def hashBytes(input : Traversable[Byte]) =
+	def digest(input : Traversable[Byte]) =
 	{
 		val md = newDigest
 		input.foreach(md.update)
