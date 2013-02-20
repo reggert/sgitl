@@ -12,8 +12,8 @@ import java.security.{DigestInputStream,MessageDigest}
 final class SHA1 private(override val toString : String, val toBytes : IndexedSeq[Byte]) 
 	extends Equals 
 {
-	require(toBytes.size == SHA1.asBytes.ExpectedLength, "toBytes.size =" + toBytes.size)
-	require(toString.length == SHA1.asString.ExpectedLength, "toString.length = " + toString.length)
+	require(toBytes.size == SHA1.AsBytes.ExpectedLength, "toBytes.size =" + toBytes.size)
+	require(toString.length == SHA1.AsString.ExpectedLength, "toString.length = " + toString.length)
   
 	override def canEqual(other: Any) = other.isInstanceOf[SHA1]
   
@@ -138,14 +138,14 @@ object SHA1
 	/**
 	 * Factory functor to create an instance of SHA1 from a byte sequence.
 	 */
-	object fromBytes
+	object FromBytes
 	{
 		/**
 		 * Constructs an instance of SHA1 from a byte sequence that makes up its value.
 		 */
 		@throws(classOf[IllegalArgumentException])
 		def apply(bytes : IndexedSeq[Byte]) : SHA1 =
-			asBytes.unapply(bytes).getOrElse(throw new IllegalArgumentException("Invalid byte sequence"))
+			AsBytes.unapply(bytes).getOrElse(throw new IllegalArgumentException("Invalid byte sequence"))
 			
 		/**
 		 * Extracts the byte sequence that makes up the value of an instance of SHA1.
@@ -157,7 +157,7 @@ object SHA1
 	/**
 	 * Extractor to obtain an instance of SHA1 from a sequence of bytes.
 	 */
-	object asBytes
+	object AsBytes
 	{
 		val ExpectedLength = 20
 		
@@ -177,14 +177,14 @@ object SHA1
 	/**
 	 * Factory functor to create an instance of SHA1 from a string representation.
 	 */
-	object fromString
+	object FromString
 	{
 		/**
 		 * Constructs an instance of SHA1 from its string representation.
 		 */
 		@throws(classOf[IllegalArgumentException])
 		def apply(s : String) : SHA1 =
-			asString.unapply(s).getOrElse(throw new IllegalArgumentException("Invalid hash string"))
+			AsString.unapply(s).getOrElse(throw new IllegalArgumentException("Invalid hash string"))
 			
 		/**
 		 * Extracts the string representation from an instance of SHA1.
@@ -196,9 +196,9 @@ object SHA1
 	/**
 	 * Extractor to obtain an instance of SHA1 from a string representation.
 	 */
-	object asString
+	object AsString
 	{
-		val ExpectedLength = asBytes.ExpectedLength * 2
+		val ExpectedLength = AsBytes.ExpectedLength * 2
 		
 		/**
 		 * Obtains the string representation from an instance of SHA1.

@@ -89,11 +89,11 @@ class LooseObjectTest extends Suite with ShouldMatchers
 	def testReadWriteTree()
 	{
 		val entries = SortedSet(
-				new TreeEntry(FileMode.NonExecutableFile, UTF8("file1.foo"), SHA1.fromBytes(Array.fill(SHA1.asBytes.ExpectedLength)(1.toByte))),
-				new TreeEntry(FileMode.ExecutableFile, UTF8("file2.sh"), SHA1.fromBytes(Array.fill(SHA1.asBytes.ExpectedLength)(2.toByte))),
-				new TreeEntry(FileMode.GitLink, UTF8("submodule1"), SHA1.fromBytes(Array.fill(SHA1.asBytes.ExpectedLength)(3.toByte))),
-				new TreeEntry(FileMode.SymLink, UTF8("file3.txt"), SHA1.fromBytes(Array.fill(SHA1.asBytes.ExpectedLength)(4.toByte))),
-				new TreeEntry(FileMode.Tree, UTF8("subdir1"), SHA1.fromBytes(Array.fill(SHA1.asBytes.ExpectedLength)(5.toByte)))
+				new TreeEntry(FileMode.NonExecutableFile, UTF8("file1.foo"), SHA1.FromBytes(Array.fill(SHA1.AsBytes.ExpectedLength)(1.toByte))),
+				new TreeEntry(FileMode.ExecutableFile, UTF8("file2.sh"), SHA1.FromBytes(Array.fill(SHA1.AsBytes.ExpectedLength)(2.toByte))),
+				new TreeEntry(FileMode.GitLink, UTF8("submodule1"), SHA1.FromBytes(Array.fill(SHA1.AsBytes.ExpectedLength)(3.toByte))),
+				new TreeEntry(FileMode.SymLink, UTF8("file3.txt"), SHA1.FromBytes(Array.fill(SHA1.AsBytes.ExpectedLength)(4.toByte))),
+				new TreeEntry(FileMode.Tree, UTF8("subdir1"), SHA1.FromBytes(Array.fill(SHA1.AsBytes.ExpectedLength)(5.toByte)))
 			)
 		val tree = new LooseTree(entries)
 		
