@@ -119,7 +119,7 @@ object SHA1
 	{
 		def apply(ns : Seq[Int]) = (ns map (HexDigit.apply)).mkString 
 		
-		def unapplySeq(digits : String) : Option[Seq[Int]] =
+		def unapply(digits : String) : Option[Seq[Int]] =
 			(digits.map(HexDigit.unapply) :\ Some(List.empty[Int]).asInstanceOf[Option[Seq[Int]]]) {
 				case (None, _) => None
 				case (_, None) => None
@@ -137,7 +137,7 @@ object SHA1
 			if (s.length() % 2 != 0) 
 				None
 			else
-				HexDigits.unapplySeq(s) map { digits =>
+				HexDigits.unapply(s) map { digits =>
 					for (Seq(high, low) <- digits.grouped(2)) 
 						yield (((high << 4) | low).toByte)
 				} map (_.toIndexedSeq)
