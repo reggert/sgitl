@@ -12,19 +12,8 @@ import java.security.{DigestInputStream,MessageDigest}
 final class SHA1 private(override val toString : String, val toBytes : IndexedSeq[Byte]) 
 	extends Equals 
 {
-	require(toBytes.size == SHA1.AsBytes.ExpectedLength, "toBytes.size =" + toBytes.size)
-	require(toString.length == SHA1.AsString.ExpectedLength, "toString.length = " + toString.length)
-	
-	def this(bytes : IndexedSeq[Byte]) = this(
-			SHA1.HexBytes.apply(bytes),
-			bytes
-		)
-			
-	def this(hashString : String) = this(
-			hashString, 
-			SHA1.HexBytes.unapply(hashString).getOrElse
-				(throw new IllegalArgumentException("Invalid hash string"))
-		)
+	require(toBytes.size == SHA1.asBytes.ExpectedLength, "toBytes.size =" + toBytes.size)
+	require(toString.length == SHA1.asString.ExpectedLength, "toString.length = " + toString.length)
   
 	def canEqual(other: Any) = other.isInstanceOf[SHA1]
   
@@ -54,7 +43,8 @@ object SHA1
 	{
 		val md = newDigest
 		input.foreach(md.update)
-		new SHA1(md.digest())
+		val bytes = md.digest()
+		new SHA1(HexBytes(bytes), bytes)
 	}
 	
 	
@@ -142,20 +132,38 @@ object SHA1
 	}
 	
 	
-	object AsBytes
+	object fromBytes
+	{
+		def apply(bytes : IndexedSeq[Byte]) : SHA1 =
+			asBytes.unapply(bytes).getOrElse(throw new IllegalArgumentException("Invalid byte sequence"))
+			
+		def unapply(sha1 : SHA1) = Some(sha1.toBytes)
+	}
+	
+	
+	object asBytes
 	{
 		val ExpectedLength = 20
 		
 		def apply(sha1 : SHA1) = sha1.toBytes
 		
 		def unapply(bytes : IndexedSeq[Byte]) : Option[SHA1] = 
-			if (bytes.size == ExpectedLength) Some(new SHA1(bytes)) else None
+			if (bytes.size == ExpectedLength) Some(new SHA1(HexBytes(bytes), bytes)) else None
 	}
 	
 	
-	object AsString
+	object fromString
 	{
-		val ExpectedLength = AsBytes.ExpectedLength * 2
+		def apply(s : String) : SHA1 =
+			asString.unapply(s).getOrElse(throw new IllegalArgumentException("Invalid hash string"))
+			
+		def unapply(sha1 : SHA1) = Some(sha1.toString)
+	}
+	
+	
+	object asString
+	{
+		val ExpectedLength = asBytes.ExpectedLength * 2
 		
 		def apply(sha1 : SHA1) = sha1.toString
 		
