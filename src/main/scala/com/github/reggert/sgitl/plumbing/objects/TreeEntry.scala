@@ -42,7 +42,7 @@ object TreeEntry
 	{
 		def unapply(encoded : Seq[Byte]) : Option[(FileMode, Seq[Byte])] = encoded.span(_ != SpaceByte) match
 		{
-			case (UTF8(FileMode.AsString(mode)), rawName) => Some(mode, rawName)
+			case (UTF8(FileMode.AsString(mode)), SpaceByte +: rawName) => Some(mode, rawName)
 			case _ => None
 		}
 	}
