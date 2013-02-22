@@ -10,7 +10,7 @@ final class TreeEntry(val fileMode : FileMode, val rawName : Seq[Byte], val refe
 	require(!rawName.contains(NullByte))
 	
 	def encoded : IndexedSeq[Byte] = 
-		(new VectorBuilder[Byte] ++= fileMode.toBytes += SpaceByte ++= rawName ++= referencedObjectId.toBytes).result
+		(new VectorBuilder[Byte] ++= fileMode.toBytes += SpaceByte ++= rawName += NullByte ++= referencedObjectId.toBytes).result
 		
 	def utf8Name = rawName match
 	{
