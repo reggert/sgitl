@@ -2,7 +2,7 @@ package com.github.reggert.sgitl.plumbing.objects
 
 import scala.collection.immutable.VectorBuilder
 
-final class TreeEntry(val fileMode : FileMode, val rawName : Seq[Byte], val referencedObjectId : SHA1)
+final case class TreeEntry(fileMode : FileMode, rawName : Seq[Byte], referencedObjectId : SHA1)
 	extends Ordered[TreeEntry]
 {
 	import TreeEntry._
