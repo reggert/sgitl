@@ -2,7 +2,7 @@ package com.github.reggert.sgitl.plumbing.objects
 
 import java.nio.charset.Charset
 import java.io.InputStream
-import java.util.zip.Deflater
+import java.util.zip.{Deflater,Inflater}
 import java.util.zip.DeflaterInputStream
 import java.util.zip.InflaterInputStream
 import scala.collection.immutable.SortedSet
@@ -24,7 +24,12 @@ sealed abstract class LooseObject
 	final def uncompressed = encodedHeader ++ content
 	
 	final def compressed(level : Int = Deflater.DEFAULT_COMPRESSION) = 
-		new DeflaterInputStream(uncompressed, new Deflater(level)).toIndexedSeq 
+	{
+		val deflater = new Deflater(level)
+		val stream = new DeflaterInputStream(uncompressed, deflater)
+		try {stream.toIndexedSeq}
+		finally {stream.close(); deflater.end()}
+	}
 	
 	final lazy val objectId = SHA1.digest(uncompressed)
 }
@@ -105,11 +110,7 @@ object LooseObject
 		case UTF8(HeaderLine(objectType, contentLength)) => (objectType, contentLength)
 		case _ => throw new InvalidObjectFormatException("invalidHeader")
 	}
-	
-	
-	
-	
-	def read(input : InputStream) : LooseObject = readUncompressed(new InflaterInputStream(input))
+		
 		
 	def readUncompressed(input : InputStream) : LooseObject = 
 		readUncompressed(Implicits.inputStream2Iterator(input))
@@ -139,6 +140,13 @@ object LooseObject
 		}
 		else
 			throw new InvalidObjectFormatException("No null byte found")
+	}
+	
+	def read(input : InputStream) : LooseObject =
+	{
+		val inflater = new Inflater
+		try {readUncompressed(new InflaterInputStream(input, inflater))}
+		finally {inflater.end()}
 	}
 	
 	def read(input : Iterator[Byte]) : LooseObject = read(Implicits.IteratorInputStream(input))
