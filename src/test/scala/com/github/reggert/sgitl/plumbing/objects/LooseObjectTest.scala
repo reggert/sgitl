@@ -97,7 +97,7 @@ class LooseObjectTest extends Suite with ShouldMatchers
 			)
 		val tree = new LooseTree(entries)
 		
-		val compressedData = tree.compressed().toIndexedSeq
+		val compressedData = tree.compressed()
 		
 		val copiedTree = LooseObject.read(compressedData)
 		copiedTree should equal(tree)
