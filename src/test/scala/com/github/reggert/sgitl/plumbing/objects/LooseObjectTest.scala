@@ -97,9 +97,13 @@ class LooseObjectTest extends Suite with ShouldMatchers
 			)
 		val tree = new LooseTree(entries)
 		
+		val uncompressedData = tree.uncompressed
 		val compressedData = tree.compressed()
 		
-		val copiedTree = LooseObject.read(compressedData)
-		copiedTree should equal(tree)
+		val copiedUncompressedTree = LooseObject.readUncompressed(uncompressedData)
+		copiedUncompressedTree should equal(tree)
+		
+		val copiedCompressedTree = LooseObject.read(compressedData)
+		copiedCompressedTree should equal(tree)
 	}
 }

@@ -107,9 +107,19 @@ object LooseObject
 	}
 	
 	
-	def read(input : InputStream) : LooseObject =
+	
+	
+	def read(input : InputStream) : LooseObject = readUncompressed(new InflaterInputStream(input))
+		
+	def readUncompressed(input : InputStream) : LooseObject = 
+		readUncompressed(Implicits.inputStream2Iterator(input))
+		
+	def readUncompressed(input : Iterable[Byte]) : LooseObject =
+		readUncompressed(input.iterator)
+	
+	def readUncompressed(input : Iterator[Byte]) : LooseObject =
 	{
-		val (encodedHeader, afterHeader) = new InflaterInputStream(input).span(_ != NullByte)
+		val (encodedHeader, afterHeader) = input.span(_ != NullByte)
 		if (afterHeader.hasNext)
 		{
 			val (objectType, contentLength) = parseHeader(encodedHeader)
