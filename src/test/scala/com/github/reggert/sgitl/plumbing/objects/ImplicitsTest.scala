@@ -12,15 +12,29 @@ class ImplicitsTest extends Suite with ShouldMatchers
 {
 	def testByteBuffer2Iterator()
 	{
-		val array = (1 to 100).map(_.toByte).toArray
-		val buffer = ByteBuffer.wrap(array)
+		val input = (1 to 100).map(_.toByte)
+		val buffer = ByteBuffer.wrap(input.toArray)
 		
 		val iterator = Implicits.byteBuffer2Iterator(buffer)
 		
-		val derivedArray = iterator.toArray
+		val output = iterator.toIndexedSeq
 		
-		derivedArray should equal (array)
+		output should equal (input)
 		buffer.hasRemaining() should be (false)
+	}
+	
+	
+	def testByteBuffer2IteratorTakeWhile()
+	{
+		val input = (1 to 100).map(_.toByte)
+		val buffer = ByteBuffer.wrap(input.toArray)
+		
+		val iterator = Implicits.byteBuffer2Iterator(buffer)
+		
+		val output = iterator.takeWhile(_ <= 50).toIndexedSeq
+		
+		output should equal (input.takeWhile(_ <= 50))
+		buffer.remaining should equal (49)
 	}
 	
 	
@@ -44,15 +58,48 @@ class ImplicitsTest extends Suite with ShouldMatchers
 	}
 	
 	
+		
 	def testInputStream2Iterator()
 	{
 		val values = (1 to 100).map(_.toByte)
 		val inputStream = new ByteArrayInputStream(values.toArray)
 		
 		val iterator = Implicits.inputStream2Iterator(inputStream)
-		val copiedValues = iterator ++: Seq.empty
+		val copiedValues = iterator.toSeq
 		
 		copiedValues should equal (values)
+		iterator.hasNext should be (false)
+		inputStream.read() should equal (-1)
+	}
+	
+	
+	def testInputStream2IteratorTakeWhile()
+	{
+		val values = (1 to 100).map(_.toByte)
+		val inputStream = new ByteArrayInputStream(values.toArray)
+		
+		val iterator = Implicits.inputStream2Iterator(inputStream)
+		val copiedValues = iterator.takeWhile(_ <= 50).toIndexedSeq
+		
+		copiedValues should equal (values.takeWhile(_ <= 50))
+		iterator.hasNext should be (true)
+		inputStream.read() should equal (53)
+	}
+	
+	
+	def testInputStream2IteratorSpan()
+	{
+		val values = (1 to 100).map(_.toByte)
+		val inputStream = new ByteArrayInputStream(values.toArray)
+		
+		val iterator = Implicits.inputStream2Iterator(inputStream)
+		val (leftIterator, rightIterator) = iterator.span(_ <= 50)
+		rightIterator.hasNext should be (true)
+		leftIterator.hasNext should be (true)
+		val (leftCopy, rightCopy) = (leftIterator.toSeq, rightIterator.toSeq)
+		
+		leftCopy should equal (1 to 50)
+		rightCopy should equal (51 to 100)
 		iterator.hasNext should be (false)
 		inputStream.read() should equal (-1)
 	}
@@ -69,6 +116,8 @@ class ImplicitsTest extends Suite with ShouldMatchers
 		inputStream.read() should equal (-1)
 		iterator.hasNext should be (false)
 	}
+	
+	
 	
 	
 	def testIterable2InputStream()
