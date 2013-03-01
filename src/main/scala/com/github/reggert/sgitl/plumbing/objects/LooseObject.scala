@@ -19,12 +19,12 @@ sealed abstract class LooseObject
 	
 	final def header = StringBuilder.newBuilder.append(objectType).append(' ').append(contentLength).toString
 	
-	private final lazy val encodedHeader : Stream[Byte] = UTF8(header) ++: Stream(NullByte)
+	private final lazy val encodedHeader : Seq[Byte] = UTF8(header) :+ NullByte
 	
-	final def uncompressed : Stream[Byte] = encodedHeader ++ content
+	final def uncompressed = encodedHeader ++ content
 	
-	final def compressed(level : Int = Deflater.DEFAULT_COMPRESSION) : Stream[Byte] = 
-		new DeflaterInputStream(uncompressed, new Deflater(level)) ++: Stream.empty
+	final def compressed(level : Int = Deflater.DEFAULT_COMPRESSION) = 
+		new DeflaterInputStream(uncompressed, new Deflater(level)).toIndexedSeq 
 	
 	final lazy val objectId = SHA1.digest(uncompressed)
 }
