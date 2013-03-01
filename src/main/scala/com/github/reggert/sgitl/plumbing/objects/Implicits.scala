@@ -16,7 +16,11 @@ trait Implicits
 	
 	implicit final class IteratorInputStream(val iterator : Iterator[Byte]) extends InputStream
 	{
-		override def read() = if (iterator.hasNext) iterator.next else -1
+		override def read() = 
+			if (iterator.hasNext) 
+				iterator.next & 0xff 
+			else 
+				-1
 	}
 
 	implicit def iterable2InputStream(iterable : Iterable[Byte]) =
