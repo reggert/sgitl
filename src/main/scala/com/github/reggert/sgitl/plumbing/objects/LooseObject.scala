@@ -127,6 +127,8 @@ object LooseObject
 			if (contentLength > Int.MaxValue) // FIXME: remove this limitation
 				throw new InvalidObjectFormatException("Exceeded maximum object size: " + contentLength)
 			val content = afterHeader.drop(1).take(contentLength.toInt).toIndexedSeq
+			if (content.length != contentLength)
+				throw new InvalidObjectFormatException("content.length != contentLength")
 			objectType match
 			{
 				case ObjectType.Blob => new LooseBlob(content)
