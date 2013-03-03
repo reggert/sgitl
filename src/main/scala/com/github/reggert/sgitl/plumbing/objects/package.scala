@@ -4,7 +4,7 @@ import java.nio.charset.Charset
 
 package object objects 
 {
-	private[objects] val NullByte : Byte = 0
-	private[objects] val UTF8 = new CharacterSet(Charset.forName("UTF-8"))
-	private[objects] val SystemEncoding = new CharacterSet(Charset.defaultCharset)
+	val NullByte : Byte = 0
+	val UTF8 = new CharacterSet(Charset.forName("UTF-8"))
+	val SystemEncoding = new CharacterSet(Charset.defaultCharset)
 }
