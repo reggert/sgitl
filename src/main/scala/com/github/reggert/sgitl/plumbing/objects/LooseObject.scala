@@ -9,7 +9,7 @@ import scala.collection.immutable.SortedSet
 
 import Implicits._
 
-sealed abstract class LooseObject
+abstract class LooseObject private[objects]()
 {
 	def objectType : ObjectType
 	def content : Traversable[Byte]
@@ -32,19 +32,6 @@ sealed abstract class LooseObject
 	}
 	
 	final lazy val objectId = SHA1.digest(uncompressed)
-}
-
-
-final case class LooseBlob(override val content : IndexedSeq[Byte]) extends LooseObject 
-{
-	override def objectType = ObjectType.Blob
-}
-
-
-final case class LooseTree(val entries : SortedSet[TreeEntry]) extends LooseObject
-{
-	override def objectType = ObjectType.Tree
-	override lazy val content = entries.toIndexedSeq.flatMap(_.encoded)
 }
 
 
