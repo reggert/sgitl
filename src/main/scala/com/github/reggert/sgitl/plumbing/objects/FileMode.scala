@@ -54,7 +54,7 @@ object FileMode
 	
 	object Tree extends FileMode
 	{
-		override def toString = "040000"
+		override def toString = "40000"
 		override def toInt = 0x40000
 	}
 
