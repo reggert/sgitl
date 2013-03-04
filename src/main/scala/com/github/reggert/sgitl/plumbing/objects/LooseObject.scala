@@ -35,46 +35,16 @@ sealed abstract class LooseObject
 }
 
 
-final class LooseBlob(override val content : IndexedSeq[Byte]) extends LooseObject 
-	with Equals
+final case class LooseBlob(override val content : IndexedSeq[Byte]) extends LooseObject 
 {
 	override def objectType = ObjectType.Blob
-  
-	def canEqual(other: Any) = other.isInstanceOf[LooseBlob]
-  
-	override def equals(other: Any) = other match 
-	{
-		case that : LooseBlob if that.canEqual(this) => content == that.content
-		case _ => false
-	}
-  
-	override def hashCode() = 
-	{
-		val prime = 41
-		prime + content.hashCode
-	}
 }
 
 
-final class LooseTree(val entries : SortedSet[TreeEntry]) extends LooseObject
-	with Equals
+final case class LooseTree(val entries : SortedSet[TreeEntry]) extends LooseObject
 {
 	override def objectType = ObjectType.Tree
 	override lazy val content = entries.toIndexedSeq.flatMap(_.encoded)
-	
-	override def canEqual(other: Any) = other.isInstanceOf[LooseTree]
-	
-	override def equals(other: Any) = other match 
-	{
-		case that : LooseTree if that.canEqual(this) => entries == that.entries
-		case _ => false
-	}
-  
-	override def hashCode() = 
-	{
-		val prime = 41
-		prime + entries.hashCode
-	}
 }
 
 
