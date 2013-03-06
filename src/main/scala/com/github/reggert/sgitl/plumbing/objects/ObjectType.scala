@@ -1,6 +1,6 @@
 package com.github.reggert.sgitl.plumbing.objects
 
-sealed class ObjectType private(override val toString : String)
+sealed abstract class ObjectType private(override val toString : String)
 
 
 object ObjectType
