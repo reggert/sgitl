@@ -43,6 +43,7 @@ object LooseObject
 	object HeaderLine
 	{
 		import java.lang.Long.parseLong
+		
 		def apply(objectType : ObjectType, contentLength : Long) : String =
 		{
 			require (contentLength >= 0L)
@@ -62,10 +63,29 @@ object LooseObject
 		}
 	}
 	
-	private def parseHeader(encodedHeader : TraversableOnce[Byte]) = encodedHeader match
+	object Uncompressed
 	{
-		case UTF8(HeaderLine(objectType, contentLength)) => (objectType, contentLength)
-		case _ => throw new InvalidObjectFormatException("invalidHeader")
+		def apply(obj : LooseObject) = obj.uncompressed
+	
+		def unapply(input : Iterator[Byte]) : Option[LooseObject] = input.span(_ != NullByte) match
+		{
+			case (UTF8(HeaderLine(objectType, contentLength)), afterHeader) if contentLength <= Int.MaxValue && afterHeader.hasNext =>
+			{
+				val content = afterHeader.drop(1)
+				objectType match
+				{
+					case ObjectType.Blob => Some(new LooseBlob(content.take(contentLength.toInt).toIndexedSeq))
+					case ObjectType.Tree => content.toIndexedSeq match
+					{
+						case TreeEntry.EncodedSeq(entries @ _*) => Some(new LooseTree(SortedSet(entries : _*)))
+						case _ => None
+					}
+					case ObjectType.Commit => throw new UnsupportedOperationException("not implemented")
+					case ObjectType.Tag => throw new UnsupportedOperationException("not implemented");
+				}
+			}
+			case _ => None
+		}
 	}
 		
 		
@@ -75,30 +95,10 @@ object LooseObject
 	def readUncompressed(input : Iterable[Byte]) : LooseObject =
 		readUncompressed(input.iterator)
 	
-	def readUncompressed(input : Iterator[Byte]) : LooseObject =
+	def readUncompressed(input : Iterator[Byte]) : LooseObject = input match
 	{
-		val (encodedHeader, afterHeader) = input.span(_ != NullByte)
-		if (afterHeader.hasNext)
-		{
-			val (objectType, contentLength) = parseHeader(encodedHeader)
-			if (contentLength > Int.MaxValue) // FIXME: remove this limitation
-				throw new InvalidObjectFormatException("Exceeded maximum object size: " + contentLength)
-			val content = afterHeader.drop(1).take(contentLength.toInt).toIndexedSeq
-			if (content.length != contentLength)
-				throw new InvalidObjectFormatException("content.length != contentLength")
-			objectType match
-			{
-				case ObjectType.Blob => new LooseBlob(content)
-				case ObjectType.Tree => content match
-				{
-					case TreeEntry.EncodedSeq(entries @ _*) => new LooseTree(SortedSet(entries : _*))
-					case _ => throw new InvalidObjectFormatException("Invalid tree object")
-				}
-				case _ => throw new UnsupportedOperationException("Only blobs and trees are supported")
-			}
-		}
-		else
-			throw new InvalidObjectFormatException("No null byte found")
+		case LooseObject.Uncompressed(obj) => obj
+		case _ => throw new InvalidObjectFormatException("input did not match object format")
 	}
 	
 	def read(input : InputStream) : LooseObject =
