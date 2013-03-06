@@ -29,7 +29,7 @@ class TreeEntryTest extends Suite with ShouldMatchers
 	{
 		val sha1a = SHA1.digest(UTF8("blah blah blah"))
 		val sha1b = SHA1.digest(UTF8("zzzzzzzzzzzzzzzzzzz"))
-		val input = ((UTF8("100644 test.txt") :+ 0.toByte) ++ sha1a.toBytes) ++ (((UTF8("040000 foo") :+ 0.toByte) ++ sha1b.toBytes))
+		val input = ((UTF8("100644 test.txt") :+ 0.toByte) ++ sha1a.toBytes) ++ (((UTF8("40000 foo") :+ 0.toByte) ++ sha1b.toBytes))
 		
 		TreeEntry.EncodedSeq.unapplySeq(input) should equal (
 				Some(
