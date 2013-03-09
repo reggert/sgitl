@@ -138,13 +138,13 @@ object SHA1
 	/**
 	 * Factory functor to create an instance of SHA1 from a byte sequence.
 	 */
-	object FromBytes
+	object FromBytes extends (IndexedSeq[Byte] => SHA1)
 	{
 		/**
 		 * Constructs an instance of SHA1 from a byte sequence that makes up its value.
 		 */
 		@throws(classOf[IllegalArgumentException])
-		def apply(bytes : IndexedSeq[Byte]) : SHA1 =
+		override def apply(bytes : IndexedSeq[Byte]) : SHA1 =
 			AsBytes.unapply(bytes).getOrElse(throw new IllegalArgumentException("Invalid byte sequence"))
 			
 		/**
@@ -177,13 +177,13 @@ object SHA1
 	/**
 	 * Factory functor to create an instance of SHA1 from a string representation.
 	 */
-	object FromString
+	object FromString extends (String => SHA1)
 	{
 		/**
 		 * Constructs an instance of SHA1 from its string representation.
 		 */
 		@throws(classOf[IllegalArgumentException])
-		def apply(s : String) : SHA1 =
+		override def apply(s : String) : SHA1 =
 			AsString.unapply(s).getOrElse(throw new IllegalArgumentException("Invalid hash string"))
 			
 		/**
