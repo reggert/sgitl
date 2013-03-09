@@ -74,13 +74,20 @@ object LooseObject
 				val content = afterHeader.drop(1)
 				objectType match
 				{
-					case ObjectType.Blob => Some(new LooseBlob(content.take(contentLength.toInt).toIndexedSeq))
+					case ObjectType.Blob => 
+						Some(new LooseBlob(content.take(contentLength.toInt).toIndexedSeq))
 					case ObjectType.Tree => content.toIndexedSeq match
 					{
-						case TreeEntry.EncodedSeq(entries @ _*) => Some(new LooseTree(SortedSet(entries : _*)))
+						case TreeEntry.EncodedSeq(entries @ _*) => 
+							Some(new LooseTree(SortedSet(entries : _*)))
 						case _ => None
 					}
-					case ObjectType.Commit => throw new UnsupportedOperationException("not implemented")
+					case ObjectType.Commit => content.toIndexedSeq match
+					{
+						case LooseCommit.EncodedContent(headers, message) => 
+							Some(new LooseCommit(headers, message))
+						case _ => None
+					}
 					case ObjectType.Tag => throw new UnsupportedOperationException("not implemented");
 				}
 			}
