@@ -38,7 +38,7 @@ abstract class LooseObject private[objects]()
 
 object LooseObject
 {
-	private val HeaderPattern = "(\\w+) +(\\d+)".r
+	private val HeaderPattern = """(\w+) +(\d+)""".r
 	
 	object HeaderLine
 	{
