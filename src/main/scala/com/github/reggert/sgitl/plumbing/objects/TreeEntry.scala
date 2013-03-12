@@ -30,13 +30,7 @@ final case class TreeEntry(fileMode : FileMode, rawName : Seq[Byte], referencedO
 	override def compare(that : TreeEntry) = 
 		Ordering.Implicits.seqDerivedOrdering(Ordering.Int).compare(this.mappedComparableName, that.mappedComparableName)
 	
-	override def toString = 
-		StringBuilder.newBuilder
-			.append("TreeEntry(")
-			.append(fileMode).append(',')
-			.append(utf8Name).append(',')
-			.append(referencedObjectId)
-			.append(')').toString
+	override def toString = s"TreeEntry($fileMode, $utf8Name, $referencedObjectId)"
 }
 
 

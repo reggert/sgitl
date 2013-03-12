@@ -54,7 +54,7 @@ class LooseObjectTest extends Suite with ShouldMatchers
 	{
 		val content = "This is some test data.  This is only a test.  Don't get too excited."
 		val encodedContent = UTF8(content)
-		val header = "blob " + encodedContent.length + "\u0000"
+		val header = s"blob ${encodedContent.length}\u0000"
 		val encodedHeader = UTF8(header)
 		val data = encodedHeader ++ encodedContent
 		

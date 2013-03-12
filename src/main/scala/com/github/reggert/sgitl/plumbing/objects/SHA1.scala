@@ -12,8 +12,8 @@ import java.security.{DigestInputStream,MessageDigest}
 final class SHA1 private(override val toString : String, val toBytes : IndexedSeq[Byte]) 
 	extends Equals 
 {
-	require(toBytes.size == SHA1.AsBytes.ExpectedLength, "toBytes.size =" + toBytes.size)
-	require(toString.length == SHA1.AsString.ExpectedLength, "toString.length = " + toString.length)
+	require(toBytes.size == SHA1.AsBytes.ExpectedLength, s"toBytes.size = ${toBytes.size}")
+	require(toString.length == SHA1.AsString.ExpectedLength, s"toString.length = ${toString.length}")
   
 	override def canEqual(other: Any) = other.isInstanceOf[SHA1]
   
@@ -99,7 +99,7 @@ object SHA1
 		
 		def apply(n : Int) : Char = applyTable.getOrElse(
 				n, 
-				throw new IllegalArgumentException("Integer out of range of hexadecimal digit: " + n)
+				throw new IllegalArgumentException(s"Integer out of range of hexadecimal digit: $n")
 			) 
 		
 		def unapply(c : Char) : Option[Int] = unapplyTable.get(c)
