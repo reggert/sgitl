@@ -30,7 +30,6 @@ final class LooseCommit private[sgitl] (val headers : Seq[(String, String)], val
 	def withDefaultEncoding : LooseCommit = 
 		new LooseCommit(headers.filterNot(_._1 == "encoding"), message)
 	
-	// TODO: can there be more than one author/committer?
 	def author = headers.find(_._1 == "author").get._2
 	
 	def committer = headers.find(_._1 == "committer").get._2
