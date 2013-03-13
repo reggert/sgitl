@@ -4,7 +4,7 @@ import scala.collection.Traversable
 import java.nio.charset.Charset
 import scala.collection.mutable.ListBuffer
 
-final class LooseCommit private[sgitl] (val headers : Seq[(String, String)], val message : String) extends LooseObject 
+final case class LooseCommit private[sgitl] (val headers : Seq[(String, String)], val message : String) extends LooseObject 
 {
 	import LooseCommit._
 	
