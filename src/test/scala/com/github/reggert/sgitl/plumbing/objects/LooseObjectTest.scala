@@ -106,4 +106,36 @@ class LooseObjectTest extends Suite with ShouldMatchers
 		val copiedCompressedTree = LooseObject.read(compressedData)
 		copiedCompressedTree should equal(tree)
 	}
+	
+	
+	private def randomHash = 
+	{
+		import scala.util.Random
+		val bytes = new Array[Byte](SHA1.AsBytes.ExpectedLength)
+		Random.nextBytes(bytes)
+		SHA1.FromBytes(bytes)
+	}
+	
+	
+	def testReadWriteCommit()
+	{
+		val treeHash, parentHash = randomHash
+		
+		val originalCommit = new LooseCommit(
+				tree=treeHash, 
+				parents=Seq(parentHash), 
+				author="Nobody <nobody@nowhere.nil> 1234567890 +0000",
+				committer="Nobody <nobody@nowhere.nil> 1234567890 +0000",
+				message="This is a test."
+			)
+		
+		val uncompressedData = originalCommit.uncompressed
+		val compressedData = originalCommit.compressed()
+		
+		val copiedUncompressedCommit = LooseObject.readUncompressed(uncompressedData)
+		copiedUncompressedCommit should equal (originalCommit)
+		
+		val copiedCompressedCommit = LooseObject.read(compressedData)
+		copiedCompressedCommit should equal (originalCommit)
+	}
 }
