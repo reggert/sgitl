@@ -68,8 +68,7 @@ object LooseCommit
 	{
 		private val NameValue = """(\S+)\s+(\S.+)""".r
 		
-		def apply(name : String, value : String) : IndexedSeq[Byte] =
-			UTF8((StringBuilder.newBuilder ++= name ++= value).toString)
+		def apply(name : String, value : String) : IndexedSeq[Byte] = UTF8(s"$name $value")
 			
 		def unapply(encoded : Seq[Byte]) : Option[(String, String)] = encoded match
 		{
