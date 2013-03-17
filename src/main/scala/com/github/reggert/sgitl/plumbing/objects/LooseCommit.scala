@@ -11,15 +11,12 @@ final case class LooseCommit private[sgitl] (override val headers : Seq[(String,
 	
 	override def objectType = ObjectType.Commit
 	
-	def this(tree : SHA1, parents : Seq[SHA1], author : String, committer : String, message : String) =
-		this(
-				parents.map(p => ("parent", p.toString)) ++ Seq(
-						("tree", tree.toString), 
-						("author", author), 
-						("committer", committer)
-					), 
-				message
-			)
+	def this(tree : SHA1, parents : Seq[SHA1], author : String, committer : String, message : String) = this(
+			headers = 
+				(for (p <- parents) yield "parent" -> p.toString) ++ 
+				Seq("tree" -> tree.toString, "author" -> author, "committer" -> committer), 
+			message = message
+		)
 			
 	def withEncoding(charset : Charset) : LooseCommit = 
 		new LooseCommit(headers.filterNot(_._1 == "encoding") :+ ("encoding", charset.name()), message)

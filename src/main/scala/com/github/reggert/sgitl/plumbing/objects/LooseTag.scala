@@ -8,6 +8,16 @@ final case class LooseTag private[sgitl] (override val headers : Seq[(String, St
 {
 	override def objectType = ObjectType.Tag
 	
+	def this(taggedObjectId : SHA1, taggedObjectType : ObjectType, name : String, tagger : String, message : String) = this(
+			headers = Seq(
+					"object" -> taggedObjectId.toString, 
+					"type"-> taggedObjectType.toString, 
+					"tag" -> name, 
+					"tagger" -> tagger
+				), 
+			message = message
+		)
+	
 	def name = headers.find(_._1 == "tag").get._2
 	
 	def tagger = headers.find(_._1 == "tagger").get._2

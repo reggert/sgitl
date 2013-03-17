@@ -138,4 +138,28 @@ class LooseObjectTest extends Suite with ShouldMatchers
 		val copiedCompressedCommit = LooseObject.read(compressedData)
 		copiedCompressedCommit should equal (originalCommit)
 	}
+	
+	
+	
+	def testReadWriteTag()
+	{
+		val targetHash = randomHash
+		
+		val originalTag = new LooseTag(
+				taggedObjectId = targetHash, 
+				taggedObjectType = ObjectType.Commit, 
+				name="Test Tag",
+				tagger="Nobody <nobody@nowhere.nil> 1234567890 +0000",
+				message="This is a test."
+			)
+		
+		val uncompressedData = originalTag.uncompressed
+		val compressedData = originalTag.compressed()
+		
+		val copiedUncompressedTag = LooseObject.readUncompressed(uncompressedData)
+		copiedUncompressedTag should equal (originalTag)
+		
+		val copiedCompressedTag = LooseObject.read(compressedData)
+		copiedCompressedTag should equal (originalTag)
+	}
 }
