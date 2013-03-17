@@ -52,7 +52,7 @@ object LooseCommit
 	private[sgitl] object EncodedHeaders
 	{
 		def apply(headers : Seq[(String, String)], encodedMessage : Seq[Byte]) : Seq[Byte] =
-			headers.flatMap(header => EncodedHeader(header._1, header._2) :+ EOL) ++ encodedMessage
+			(headers.flatMap(header => EncodedHeader(header._1, header._2) :+ EOL) :+ EOL) ++ encodedMessage
 		
 		def unapply(encoded : Seq[Byte]) : Option[(Seq[(String, String)], Seq[Byte])] = encoded.span(_ != EOL) match
 		{
