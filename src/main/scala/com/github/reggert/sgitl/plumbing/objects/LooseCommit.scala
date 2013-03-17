@@ -42,7 +42,7 @@ final case class LooseCommit private[sgitl] (val headers : Seq[(String, String)]
 
 object LooseCommit
 {
-	private val EOL = '\n'.toByte
+	val EOL = '\n'.toByte
 	
 	private[sgitl] def encodingFromHeaders(headers : Seq[(String, String)]) = 
 		headers.find(header => header._1 == "encoding")
@@ -54,7 +54,7 @@ object LooseCommit
 		def apply(headers : Seq[(String, String)], encodedMessage : Seq[Byte]) : Seq[Byte] =
 			headers.flatMap(header => EncodedHeader(header._1, header._2) :+ EOL) ++ encodedMessage
 		
-		def unapply(encoded : Seq[Byte]) : Option[(Seq[(String, String)], Seq[Byte])] = encoded.span(_ == EOL) match
+		def unapply(encoded : Seq[Byte]) : Option[(Seq[(String, String)], Seq[Byte])] = encoded.span(_ != EOL) match
 		{
 			case (Seq(), EOL +: encodedMessage) => 
 				Some(Seq.empty, encodedMessage)
