@@ -84,11 +84,16 @@ object LooseObject
 					}
 					case ObjectType.Commit => content.toIndexedSeq match
 					{
-						case LooseCommit.EncodedContent(headers, message) => 
+						case HeaderMessageObject.EncodedContent(headers, message) => 
 							Some(new LooseCommit(headers, message))
 						case _ => None
 					}
-					case ObjectType.Tag => throw new UnsupportedOperationException("not implemented");
+					case ObjectType.Tag => content.toIndexedSeq match
+					{
+						case HeaderMessageObject.EncodedContent(headers, message) => 
+							Some(new LooseTag(headers, message))
+						case _ => None
+					}
 				}
 			}
 			case _ => None
