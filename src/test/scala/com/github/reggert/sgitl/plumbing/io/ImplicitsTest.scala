@@ -1,12 +1,11 @@
-package com.github.reggert.sgitl.plumbing.objects
+package com.github.reggert.sgitl.plumbing.io
 
 import org.scalatest.Suite
 import org.scalatest.matchers.ShouldMatchers
-import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 import java.nio.ByteBuffer
 import java.io.ByteArrayInputStream
-import com.github.reggert.sgitl.plumbing.io.Implicits
 
 @RunWith(classOf[JUnitRunner])
 class ImplicitsTest extends Suite with ShouldMatchers
