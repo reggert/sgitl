@@ -2,6 +2,7 @@ package com.github.reggert.sgitl.plumbing.objects
 
 import java.nio.CharBuffer
 import java.nio.charset.{Charset,CharacterCodingException}
+import com.github.reggert.sgitl.plumbing.io.Implicits
 
 class CharacterSet(val charset : Charset) 
 {

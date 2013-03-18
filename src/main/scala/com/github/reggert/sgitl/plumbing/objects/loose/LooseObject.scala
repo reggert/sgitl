@@ -7,7 +7,7 @@ import java.util.zip.InflaterInputStream
 import scala.collection.immutable.SortedSet
 import com.github.reggert.sgitl.plumbing.objects.GitObject
 import com.github.reggert.sgitl.plumbing.objects.HeaderMessageObject
-import com.github.reggert.sgitl.plumbing.objects.Implicits
+import com.github.reggert.sgitl.plumbing.io.Implicits
 import com.github.reggert.sgitl.plumbing.objects.InvalidObjectFormatException
 import com.github.reggert.sgitl.plumbing.objects.ObjectType
 import com.github.reggert.sgitl.plumbing.objects.SHA1

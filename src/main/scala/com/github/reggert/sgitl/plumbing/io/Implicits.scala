@@ -1,4 +1,4 @@
-package com.github.reggert.sgitl.plumbing.objects
+package com.github.reggert.sgitl.plumbing.io
 
 import java.nio.ByteBuffer
 import java.io.InputStream

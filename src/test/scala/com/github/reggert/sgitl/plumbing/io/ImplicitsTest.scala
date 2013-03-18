@@ -6,6 +6,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import java.nio.ByteBuffer
 import java.io.ByteArrayInputStream
+import com.github.reggert.sgitl.plumbing.io.Implicits
 
 @RunWith(classOf[JUnitRunner])
 class ImplicitsTest extends Suite with ShouldMatchers
