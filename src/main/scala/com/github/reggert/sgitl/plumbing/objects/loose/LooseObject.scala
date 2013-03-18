@@ -1,67 +1,46 @@
-package com.github.reggert.sgitl.plumbing.objects
+package com.github.reggert.sgitl.plumbing.objects.loose
 
-import java.nio.charset.Charset
 import java.io.InputStream
 import java.util.zip.{Deflater,Inflater}
 import java.util.zip.DeflaterInputStream
 import java.util.zip.InflaterInputStream
 import scala.collection.immutable.SortedSet
+import com.github.reggert.sgitl.plumbing.objects.GitObject
+import com.github.reggert.sgitl.plumbing.objects.HeaderMessageObject
+import com.github.reggert.sgitl.plumbing.objects.Implicits
+import com.github.reggert.sgitl.plumbing.objects.InvalidObjectFormatException
+import com.github.reggert.sgitl.plumbing.objects.ObjectType
+import com.github.reggert.sgitl.plumbing.objects.SHA1
+import com.github.reggert.sgitl.plumbing.objects.TreeEntry
+import com.github.reggert.sgitl.plumbing.objects.{NullByte,UTF8}
+import java.lang.Long.parseLong
 
-import Implicits._
-
-abstract class LooseObject private[objects]()
+abstract class LooseObject private[objects]() extends GitObject
 {
-	def objectType : ObjectType
-	def content : Traversable[Byte]
-	def contentLength : Long = content.size.toLong
-
-	import LooseObject._
+	import GitObject._
 	
-	final def header = StringBuilder.newBuilder.append(objectType).append(' ').append(contentLength).toString
+	final override lazy val objectId = SHA1.digest(uncompressed)
 	
-	private final lazy val encodedHeader : Seq[Byte] = UTF8(header) :+ NullByte
+	final def header = HeaderLine(objectType, contentLength)
+	
+	protected final lazy val encodedHeader : Seq[Byte] = UTF8(header) :+ NullByte
 	
 	final def uncompressed = encodedHeader ++ content
 	
 	final def compressed(level : Int = Deflater.DEFAULT_COMPRESSION) = 
 	{
+		import Implicits._
 		val deflater = new Deflater(level)
 		val stream = new DeflaterInputStream(uncompressed, deflater)
 		try {stream.toIndexedSeq}
 		finally {stream.close(); deflater.end()}
 	}
-	
-	final lazy val objectId = SHA1.digest(uncompressed)
 }
-
 
 
 object LooseObject
 {
-	private val HeaderPattern = """(\w+) +(\d+)""".r
-	
-	object HeaderLine
-	{
-		import java.lang.Long.parseLong
-		
-		def apply(objectType : ObjectType, contentLength : Long) : String =
-		{
-			require (contentLength >= 0L)
-			StringBuilder.newBuilder.append(objectType).append(' ').append(contentLength).toString
-		}
-		
-		def unapply(s : String) : Option[(ObjectType, Long)] = s match
-		{
-			case HeaderPattern(typeId, contentLengthString) => typeId match
-			{
-				case ObjectType(objectType) => 
-					try {Some(objectType, parseLong(contentLengthString))}
-					catch {case _ : NumberFormatException => None}
-				case _ => None
-			}
-			case _ => None
-		}
-	}
+	import GitObject._
 	
 	object Uncompressed
 	{

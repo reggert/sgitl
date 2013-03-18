@@ -1,13 +1,12 @@
-package com.github.reggert.sgitl.plumbing.objects
-
-import scala.collection.Traversable
+package com.github.reggert.sgitl.plumbing.objects.loose
 import java.nio.charset.Charset
+import com.github.reggert.sgitl.plumbing.objects.GitTag
+import com.github.reggert.sgitl.plumbing.objects.ObjectType
+import com.github.reggert.sgitl.plumbing.objects.SHA1
 
 final case class LooseTag private[sgitl] (override val headers : Seq[(String, String)], override val message : String) 
-	extends LooseObject with HeaderMessageObject 
+	extends LooseObject with GitTag 
 {
-	override def objectType = ObjectType.Tag
-	
 	def this(taggedObjectId : SHA1, taggedObjectType : ObjectType, name : String, tagger : String, message : String) = this(
 			headers = Seq(
 					"object" -> taggedObjectId.toString, 
@@ -17,14 +16,6 @@ final case class LooseTag private[sgitl] (override val headers : Seq[(String, St
 				), 
 			message = message
 		)
-	
-	def name = headers.find(_._1 == "tag").get._2
-	
-	def tagger = headers.find(_._1 == "tagger").get._2
-	
-	def taggedObjectType : ObjectType = ObjectType.unapply(headers.find(_._1 == "type").get._2).get
-	
-	def taggedObjectId : SHA1 = SHA1.FromString(headers.find(_._1 == "object").get._2)
 	
 	def withEncoding(charset : Charset) : LooseTag = 
 		new LooseTag(headers.filterNot(_._1 == "encoding") :+ ("encoding", charset.name()), message)

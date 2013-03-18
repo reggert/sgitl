@@ -1,8 +1,9 @@
 package com.github.reggert.sgitl.plumbing.objects
 
 import java.nio.charset.Charset
+import com.github.reggert.sgitl.plumbing.objects.loose.LooseObject
 
-trait HeaderMessageObject extends LooseObject
+trait HeaderMessageObject extends GitObject
 {
 	import HeaderMessageObject._
 	

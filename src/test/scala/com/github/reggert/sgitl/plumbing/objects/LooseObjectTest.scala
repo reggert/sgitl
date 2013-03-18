@@ -8,6 +8,11 @@ import java.io.{ByteArrayOutputStream, ByteArrayInputStream, OutputStreamWriter}
 import java.util.zip.DeflaterOutputStream
 import java.nio.charset.Charset
 import scala.collection.immutable.SortedSet
+import com.github.reggert.sgitl.plumbing.objects.loose.LooseCommit
+import com.github.reggert.sgitl.plumbing.objects.loose.LooseBlob
+import com.github.reggert.sgitl.plumbing.objects.loose.LooseTag
+import com.github.reggert.sgitl.plumbing.objects.loose.LooseTree
+import com.github.reggert.sgitl.plumbing.objects.loose.LooseObject
 
 @RunWith(classOf[JUnitRunner])
 class LooseObjectTest extends Suite with ShouldMatchers
@@ -15,13 +20,13 @@ class LooseObjectTest extends Suite with ShouldMatchers
 
 	def testHeaderLineApply()
 	{
-		val headerLine = LooseObject.HeaderLine(ObjectType.Blob, 1234L)
+		val headerLine = GitObject.HeaderLine(ObjectType.Blob, 1234L)
 		headerLine should equal ("blob 1234")
 	}
 	
 	def testHeaderLineUnapply()
 	{
-		import LooseObject.HeaderLine
+		import GitObject.HeaderLine
 		withClue("blob 1234")
 		{
 			HeaderLine.unapply("blob 1234") should equal (Some(ObjectType.Blob, 1234L))

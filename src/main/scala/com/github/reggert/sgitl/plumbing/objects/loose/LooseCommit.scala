@@ -1,16 +1,12 @@
-package com.github.reggert.sgitl.plumbing.objects
-
-import scala.collection.Traversable
+package com.github.reggert.sgitl.plumbing.objects.loose
 import java.nio.charset.Charset
-import scala.collection.mutable.ListBuffer
+import com.github.reggert.sgitl.plumbing.objects.GitCommit
+import com.github.reggert.sgitl.plumbing.objects.ObjectType
+import com.github.reggert.sgitl.plumbing.objects.SHA1
 
 final case class LooseCommit private[sgitl] (override val headers : Seq[(String, String)], override val message : String) 
-	extends LooseObject with HeaderMessageObject
+	extends LooseObject with GitCommit
 {
-	import HeaderMessageObject._
-	
-	override def objectType = ObjectType.Commit
-	
 	def this(tree : SHA1, parents : Seq[SHA1], author : String, committer : String, message : String) = this(
 			headers = 
 				(for (p <- parents) yield "parent" -> p.toString) ++ 
@@ -23,13 +19,5 @@ final case class LooseCommit private[sgitl] (override val headers : Seq[(String,
 	
 	def withDefaultEncoding : LooseCommit = 
 		new LooseCommit(headers.filterNot(_._1 == "encoding"), message)
-	
-	def author = headers.find(_._1 == "author").get._2
-	
-	def committer = headers.find(_._1 == "committer").get._2
-	
-	def parents = headers.view.filter(_._1 == "parent").map(_._2).map(SHA1.FromString).force
-	
-	def tree = headers.find(_._1 == "tree").map(_._2).map(SHA1.FromString).get
 }
 
